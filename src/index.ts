@@ -9,7 +9,7 @@ import {
 
 // Configuration from environment variables
 const API_BASE_URL = process.env.JOBJOURNEY_API_URL || "http://localhost:5014";
-const AUTH_TOKEN = process.env.JOBJOURNEY_AUTH_TOKEN || "";
+const API_KEY = process.env.JOBJOURNEY_API_KEY || "";
 
 // Job status constants (matching backend)
 const JOB_STATUS = {
@@ -40,7 +40,7 @@ async function apiCall(
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(AUTH_TOKEN && { Authorization: `Bearer ${AUTH_TOKEN}` }),
+    ...(API_KEY && { "X-API-Key": API_KEY }),
     ...(options.headers as Record<string, string>),
   };
 
@@ -220,7 +220,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await fetch(`${API_BASE_URL}/api/Job/manually-save`, {
           method: "POST",
           headers: {
-            ...(AUTH_TOKEN && { Authorization: `Bearer ${AUTH_TOKEN}` }),
+            ...(API_KEY && { "X-API-Key": API_KEY }),
           },
           body: formData,
         });
