@@ -1,13 +1,39 @@
 {
   "name": "jobjourney-mcp",
   "version": "1.0.0",
-  "description": "MCP server for JobJourney - save jobs, get status, find coffee chat contacts",
+  "description": "MCP server for JobJourney - save jobs, track applications, find coffee chat contacts",
   "main": "dist/index.js",
+  "bin": {
+    "jobjourney-mcp": "dist/index.js"
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc && node dist/index.js"
+    "dev": "tsc && node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "jobjourney",
+    "job-tracking",
+    "ai-assistant"
+  ],
+  "author": "JobJourney",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rorogogogo/jobjourney-mcp"
+  },
+  "homepage": "https://jobjourney.me",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
