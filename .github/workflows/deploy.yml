@@ -1,0 +1,88 @@
+name: MCP Server CI/CD
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Azure VM
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          AZURE_VM_USER: ${{ secrets.AZURE_VM_USER }}
+          AZURE_VM_SSH_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+          MCP_DEPLOY_PATH: /var/www/jobjourney-mcp
+        run: |
+          # Store private key
+          echo "$AZURE_VM_SSH_KEY" > deploy.pem
+          chmod 600 deploy.pem
+
+          # Create deploy directory on server
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "sudo mkdir -p $MCP_DEPLOY_PATH && sudo chown $AZURE_VM_USER:$AZURE_VM_USER $MCP_DEPLOY_PATH"
+
+          # Copy built files (dist + package files)
+          scp -o StrictHostKeyChecking=no -i deploy.pem -r dist package.json package-lock.json $AZURE_VM_USER@$AZURE_VM_HOST:$MCP_DEPLOY_PATH/
+
+          # Install production dependencies and restart service
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST << 'EOF'
+            cd /var/www/jobjourney-mcp
+            npm ci --omit=dev
+
+            # Create systemd service if it doesn't exist
+            if [ ! -f /etc/systemd/system/jobjourney-mcp.service ]; then
+              sudo tee /etc/systemd/system/jobjourney-mcp.service > /dev/null << 'SERVICE'
+          [Unit]
+          Description=JobJourney MCP Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=azureuser
+          WorkingDirectory=/var/www/jobjourney-mcp
+          ExecStart=/usr/bin/node /var/www/jobjourney-mcp/dist/index.js
+          Restart=on-failure
+          RestartSec=10
+          Environment=NODE_ENV=production
+          EnvironmentFile=/var/www/jobjourney-mcp/.env
+
+          [Install]
+          WantedBy=multi-user.target
+          SERVICE
+              sudo systemctl daemon-reload
+              sudo systemctl enable jobjourney-mcp
+            fi
+
+            # Restart the service
+            sudo systemctl restart jobjourney-mcp
+          EOF
+
+          # Cleanup
+          rm deploy.pem
+
+      - name: Verify deployment
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          AZURE_VM_USER: ${{ secrets.AZURE_VM_USER }}
+          AZURE_VM_SSH_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+        run: |
+          echo "$AZURE_VM_SSH_KEY" > deploy.pem
+          chmod 600 deploy.pem
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "sudo systemctl status jobjourney-mcp --no-pager"
+          rm deploy.pem
