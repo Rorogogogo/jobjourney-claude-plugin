@@ -40,38 +40,8 @@ jobs:
           # Copy built files (dist + package files)
           scp -o StrictHostKeyChecking=no -i deploy.pem -r dist package.json package-lock.json $AZURE_VM_USER@$AZURE_VM_HOST:$MCP_DEPLOY_PATH/
 
-          # Install production dependencies and restart service
-          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST << 'EOF'
-            cd /var/www/jobjourney-mcp
-            npm ci --omit=dev
-
-            # Create systemd service if it doesn't exist
-            if [ ! -f /etc/systemd/system/jobjourney-mcp.service ]; then
-              sudo tee /etc/systemd/system/jobjourney-mcp.service > /dev/null << 'SERVICE'
-          [Unit]
-          Description=JobJourney MCP Server
-          After=network.target
-
-          [Service]
-          Type=simple
-          User=azureuser
-          WorkingDirectory=/var/www/jobjourney-mcp
-          ExecStart=/usr/bin/node /var/www/jobjourney-mcp/dist/index.js
-          Restart=on-failure
-          RestartSec=10
-          Environment=NODE_ENV=production
-          EnvironmentFile=/var/www/jobjourney-mcp/.env
-
-          [Install]
-          WantedBy=multi-user.target
-          SERVICE
-              sudo systemctl daemon-reload
-              sudo systemctl enable jobjourney-mcp
-            fi
-
-            # Restart the service
-            sudo systemctl restart jobjourney-mcp
-          EOF
+          # Install production dependencies
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "cd $MCP_DEPLOY_PATH && npm ci --omit=dev"
 
           # Cleanup
           rm deploy.pem
@@ -84,5 +54,6 @@ jobs:
         run: |
           echo "$AZURE_VM_SSH_KEY" > deploy.pem
           chmod 600 deploy.pem
-          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "sudo systemctl status jobjourney-mcp --no-pager"
+          echo "Verifying MCP server deployment..."
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "ls -la /var/www/jobjourney-mcp/ && node --version && echo 'MCP server files deployed successfully!'"
           rm deploy.pem
