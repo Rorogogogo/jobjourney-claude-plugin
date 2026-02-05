@@ -14,11 +14,43 @@ MCP (Model Context Protocol) server for [JobJourney](https://jobjourney.me) - tr
 ### 1. Get Your API Key
 
 1. Log into [JobJourney](https://jobjourney.me)
-2. Go to **Settings → API Keys**
+2. Go to **Profile → API Keys**
 3. Click **Generate New Key**
 4. Copy the key (shown only once)
 
-### 2. Configure Claude Desktop
+---
+
+### Option A: Claude Code (CLI)
+
+Run this command in your terminal:
+
+```bash
+claude mcp add jobjourney \
+  -e JOBJOURNEY_API_URL=https://api.jobjourney.me \
+  -e JOBJOURNEY_API_KEY=jj_your_api_key_here \
+  -- npx -y jobjourney-mcp
+```
+
+Or add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "jobjourney": {
+      "command": "npx",
+      "args": ["-y", "jobjourney-mcp"],
+      "env": {
+        "JOBJOURNEY_API_URL": "https://api.jobjourney.me",
+        "JOBJOURNEY_API_KEY": "jj_your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Option B: Claude Desktop (App)
 
 Edit your Claude Desktop config file:
 
@@ -40,9 +72,9 @@ Edit your Claude Desktop config file:
 }
 ```
 
-### 3. Restart Claude Desktop
+Then restart Claude Desktop.
 
-Close and reopen Claude Desktop. You're ready!
+---
 
 ## Usage Examples
 
@@ -75,6 +107,7 @@ Just talk naturally to Claude:
 ## Links
 
 - [JobJourney Website](https://jobjourney.me)
+- [Setup Guide](https://jobjourney.me/mcp-setup)
 - [GitHub Repository](https://github.com/Rorogogogo/jobjourney-mcp)
 - [Report Issues](https://github.com/Rorogogogo/jobjourney-mcp/issues)
 
