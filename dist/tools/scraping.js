@@ -5,8 +5,9 @@ export function registerScrapingTools(server) {
         name: "get_scraping_stats",
         description: "View job scraping statistics from the browser extension.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/scraping-statistics"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/scraping-statistics", {}, apiKey));
             const stats = data.data;
             if (!stats)
                 return "Could not retrieve scraping statistics.";
@@ -23,8 +24,9 @@ export function registerScrapingTools(server) {
         name: "get_scraping_stats_aggregated",
         description: "View aggregated scraping statistics with breakdowns by website and time period.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/scraping-statistics/aggregated"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/scraping-statistics/aggregated", {}, apiKey));
             if (!data.data)
                 return "Could not retrieve aggregated scraping statistics.";
             return typeof data.data === "string" ? data.data : JSON.stringify(data.data, null, 2);

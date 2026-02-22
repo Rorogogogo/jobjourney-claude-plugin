@@ -1,14 +1,14 @@
 export const API_BASE_URL = process.env.JOBJOURNEY_API_URL || "http://localhost:5014";
-export const API_KEY = process.env.JOBJOURNEY_API_KEY || "";
 
 export async function apiCall(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  apiKey?: string
 ): Promise<unknown> {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(API_KEY && { "X-API-Key": API_KEY }),
+    ...(apiKey && { "X-API-Key": apiKey }),
     ...(options.headers as Record<string, string>),
   };
 

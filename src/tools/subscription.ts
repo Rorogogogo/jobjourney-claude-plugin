@@ -1,14 +1,16 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerSubscriptionTools(server: FastMCP) {
+export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "get_subscription_status",
     description: "Check the user's current subscription status and plan details.",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/subscription/status")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/subscription/status", {}, apiKey)) as {
         data?: {
           plan?: string; status?: string; currentPeriodEnd?: string;
           features?: string[]; trialEnd?: string;
@@ -33,8 +35,9 @@ export function registerSubscriptionTools(server: FastMCP) {
     name: "get_subscription_plans",
     description: "View available subscription plans and pricing.",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/subscription/plans")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/subscription/plans", {}, apiKey)) as {
         data?: Array<{
           name: string; price?: number; interval?: string;
           features?: string[]; description?: string;
@@ -60,8 +63,9 @@ export function registerSubscriptionTools(server: FastMCP) {
     parameters: z.object({
       feature_name: z.string().describe("The feature name to check access for"),
     }),
-    execute: async (args) => {
-      const data = (await apiCall(`/api/subscription/check/${args.feature_name}`)) as {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, apiKey)) as {
         data?: { hasAccess?: boolean; reason?: string };
       };
 
@@ -78,8 +82,9 @@ export function registerSubscriptionTools(server: FastMCP) {
     name: "get_payment_history",
     description: "View the user's payment history.",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/subscription/payments")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/subscription/payments", {}, apiKey)) as {
         data?: Array<{
           amount: number; currency?: string; status: string;
           createdOnUtc: string; description?: string;

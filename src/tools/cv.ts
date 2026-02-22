@@ -1,8 +1,9 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerCvTools(server: FastMCP) {
+export function registerCvTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "generate_cv",
     description: "Generate a CV/resume as PDF using AI based on the user's profile.",
@@ -11,7 +12,8 @@ export function registerCvTools(server: FastMCP) {
       job_title: z.string().optional().describe("Target job title to tailor the CV for"),
       job_description: z.string().optional().describe("Job description to tailor the CV for"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body: Record<string, unknown> = {};
       if (args.template) body.template = args.template;
       if (args.job_title) body.jobTitle = args.job_title;
@@ -20,7 +22,7 @@ export function registerCvTools(server: FastMCP) {
       const data = (await apiCall("/api/cv/generate", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: unknown; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: unknown; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `CV generation failed: ${data.message || data.errorCode}`;
@@ -41,7 +43,8 @@ export function registerCvTools(server: FastMCP) {
       job_description: z.string().optional().describe("Job description to tailor the CV for"),
       name: z.string().optional().describe("Name for the saved document"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body: Record<string, unknown> = {};
       if (args.template) body.template = args.template;
       if (args.job_title) body.jobTitle = args.job_title;
@@ -51,7 +54,7 @@ export function registerCvTools(server: FastMCP) {
       const data = (await apiCall("/api/cv/generate-and-store", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: { id?: string; name?: string }; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: { id?: string; name?: string }; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `CV generation failed: ${data.message || data.errorCode}`;

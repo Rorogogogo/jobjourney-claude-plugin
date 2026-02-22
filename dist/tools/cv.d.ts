@@ -1,2 +1,3 @@
 import { FastMCP } from "fastmcp";
-export declare function registerCvTools(server: FastMCP): void;
+import { SessionAuth } from "../types.js";
+export declare function registerCvTools(server: FastMCP<SessionAuth>): void;

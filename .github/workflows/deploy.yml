@@ -40,8 +40,8 @@ jobs:
           # Copy built files (dist + package files)
           scp -o StrictHostKeyChecking=no -i deploy.pem -r dist package.json package-lock.json $AZURE_VM_USER@$AZURE_VM_HOST:$MCP_DEPLOY_PATH/
 
-          # Install production dependencies
-          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "cd $MCP_DEPLOY_PATH && npm ci --omit=dev"
+          # Install production dependencies and restart the MCP server
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "cd $MCP_DEPLOY_PATH && npm ci --omit=dev && (pm2 restart jobjourney-mcp 2>/dev/null || pm2 start dist/index.js --name jobjourney-mcp)"
 
           # Cleanup
           rm deploy.pem
@@ -55,5 +55,5 @@ jobs:
           echo "$AZURE_VM_SSH_KEY" > deploy.pem
           chmod 600 deploy.pem
           echo "Verifying MCP server deployment..."
-          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "ls -la /var/www/jobjourney-mcp/ && node --version && echo 'MCP server files deployed successfully!'"
+          ssh -o StrictHostKeyChecking=no -i deploy.pem $AZURE_VM_USER@$AZURE_VM_HOST "ls -la /var/www/jobjourney-mcp/ && node --version && curl -sf http://localhost:8080/health && echo ' - MCP server is running!'"
           rm deploy.pem

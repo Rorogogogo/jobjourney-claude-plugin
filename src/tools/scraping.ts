@@ -1,14 +1,16 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerScrapingTools(server: FastMCP) {
+export function registerScrapingTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "get_scraping_stats",
     description: "View job scraping statistics from the browser extension.",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/scraping-statistics")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/scraping-statistics", {}, apiKey)) as {
         data?: {
           totalJobsScraped?: number; totalSessions?: number;
           websites?: Array<{ name: string; jobCount: number }>;
@@ -33,8 +35,9 @@ export function registerScrapingTools(server: FastMCP) {
     name: "get_scraping_stats_aggregated",
     description: "View aggregated scraping statistics with breakdowns by website and time period.",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/scraping-statistics/aggregated")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/scraping-statistics/aggregated", {}, apiKey)) as {
         data?: unknown;
       };
 

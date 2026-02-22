@@ -5,8 +5,9 @@ export function registerDashboardTools(server) {
         name: "get_dashboard_stats",
         description: "Get an overview of the user's job search progress including job counts by status, scraping metrics, document counts, and feature usage. Great for answering 'how is my job search going?'",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/dashboard/statistics"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/dashboard/statistics", {}, apiKey));
             const stats = data.data;
             if (!stats)
                 return "Could not retrieve dashboard statistics.";

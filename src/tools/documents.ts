@@ -1,8 +1,9 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerDocumentTools(server: FastMCP) {
+export function registerDocumentTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "get_documents",
     description: "List all user documents (CVs and cover letters).",
@@ -12,12 +13,13 @@ export function registerDocumentTools(server: FastMCP) {
         .optional()
         .describe("Type of documents to list (default: all)"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const docType = args.type || "all";
       const results: string[] = [];
 
       if (docType === "all" || docType === "cvs") {
-        const cvData = (await apiCall("/api/document/cvs")) as {
+        const cvData = (await apiCall("/api/document/cvs", {}, apiKey)) as {
           data?: Array<{ id: string; name: string; createdOnUtc: string }>;
         };
         const cvs = cvData.data || [];
@@ -32,7 +34,7 @@ export function registerDocumentTools(server: FastMCP) {
       }
 
       if (docType === "all" || docType === "cover-letters") {
-        const clData = (await apiCall("/api/document/cover-letters")) as {
+        const clData = (await apiCall("/api/document/cover-letters", {}, apiKey)) as {
           data?: Array<{ id: string; name: string; createdOnUtc: string }>;
         };
         const cls = clData.data || [];
@@ -56,8 +58,9 @@ export function registerDocumentTools(server: FastMCP) {
     parameters: z.object({
       document_id: z.string().describe("The document ID"),
     }),
-    execute: async (args) => {
-      const data = (await apiCall(`/api/document/${args.document_id}`)) as {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall(`/api/document/${args.document_id}`, {}, apiKey)) as {
         data?: {
           id: string; name: string; content?: string; type?: string;
           createdOnUtc: string; updatedOnUtc?: string;
@@ -85,8 +88,9 @@ export function registerDocumentTools(server: FastMCP) {
       document_id: z.string().describe("The document ID to delete"),
       type: z.enum(["cv", "cover-letter"]).describe("Type of document to delete"),
     }),
-    execute: async (args) => {
-      await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" });
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
+      await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, apiKey);
       return "Document deleted successfully.";
     },
   });
@@ -98,11 +102,12 @@ export function registerDocumentTools(server: FastMCP) {
       document_id: z.string().describe("The document ID to rename"),
       name: z.string().describe("The new name for the document"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       await apiCall(`/api/document/rename/${args.document_id}`, {
         method: "PUT",
         body: JSON.stringify({ name: args.name }),
-      });
+      }, apiKey);
       return `Document renamed to "${args.name}" successfully.`;
     },
   });

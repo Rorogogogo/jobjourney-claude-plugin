@@ -5,8 +5,9 @@ export function registerProfileTools(server) {
         name: "get_profile",
         description: "Get the user's profile information including skills, experience, education, and projects.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/profile"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/profile", {}, apiKey));
             const p = data.data;
             if (!p)
                 return "Could not retrieve profile.";
@@ -37,7 +38,8 @@ export function registerProfileTools(server) {
             bio: z.string().optional().describe("Bio/about section"),
             location: z.string().optional().describe("Location"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {};
             if (args.first_name)
                 body.firstName = args.first_name;
@@ -52,7 +54,7 @@ export function registerProfileTools(server) {
             await apiCall("/api/profile/basic", {
                 method: "PUT",
                 body: JSON.stringify(body),
-            });
+            }, apiKey);
             return "Basic profile information updated successfully.";
         },
     });
@@ -62,11 +64,12 @@ export function registerProfileTools(server) {
         parameters: z.object({
             skills: z.array(z.object({ name: z.string().describe("Skill name") })).describe("List of skills"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall("/api/profile/skills", {
                 method: "PUT",
                 body: JSON.stringify({ skills: args.skills }),
-            });
+            }, apiKey);
             return "Skills updated successfully.";
         },
     });
@@ -82,11 +85,12 @@ export function registerProfileTools(server) {
                 description: z.string().optional().describe("Role description"),
             })).describe("List of employment entries"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall("/api/profile/employment", {
                 method: "PUT",
                 body: JSON.stringify({ employments: args.employments }),
-            });
+            }, apiKey);
             return "Employment history updated successfully.";
         },
     });
@@ -102,11 +106,12 @@ export function registerProfileTools(server) {
                 endDate: z.string().optional().describe("End date (YYYY-MM-DD)"),
             })).describe("List of education entries"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall("/api/profile/education", {
                 method: "PUT",
                 body: JSON.stringify({ educations: args.educations }),
-            });
+            }, apiKey);
             return "Education history updated successfully.";
         },
     });
@@ -121,11 +126,12 @@ export function registerProfileTools(server) {
                 technologies: z.string().optional().describe("Technologies used"),
             })).describe("List of projects"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall("/api/profile/projects", {
                 method: "PUT",
                 body: JSON.stringify({ projects: args.projects }),
-            });
+            }, apiKey);
             return "Projects updated successfully.";
         },
     });
@@ -141,11 +147,12 @@ export function registerProfileTools(server) {
                 phone: z.string().optional().describe("Contact phone"),
             })).describe("List of references"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall("/api/profile/references", {
                 method: "PUT",
                 body: JSON.stringify({ references: args.references }),
-            });
+            }, apiKey);
             return "References updated successfully.";
         },
     });
@@ -179,7 +186,8 @@ export function registerProfileTools(server) {
                 phone: z.string().optional(),
             })).optional().describe("References list"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {};
             if (args.first_name)
                 body.firstName = args.first_name;
@@ -204,7 +212,7 @@ export function registerProfileTools(server) {
             await apiCall("/api/profile/full", {
                 method: "PUT",
                 body: JSON.stringify(body),
-            });
+            }, apiKey);
             return "Full profile updated successfully.";
         },
     });
@@ -214,8 +222,9 @@ export function registerProfileTools(server) {
         parameters: z.object({
             identifier: z.string().describe("Portfolio identifier (username or slug)"),
         }),
-        execute: async (args) => {
-            const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`));
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`, {}, apiKey));
             const p = data.data;
             if (!p)
                 return "Portfolio not found.";

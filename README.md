@@ -25,7 +25,33 @@ Claude Code plugin for [JobJourney](https://jobjourney.me) - track job applicati
 
 ---
 
-### Option A: Claude Code Plugin (Recommended)
+### Option A: Remote MCP (Recommended)
+
+Connect directly to the hosted MCP server — no installation needed:
+
+```bash
+claude mcp add jobjourney -t url -h "X-API-Key: jj_your_api_key_here" https://server.jobjourney.me/mcp
+```
+
+Or add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "jobjourney": {
+      "type": "url",
+      "url": "https://server.jobjourney.me/mcp",
+      "headers": {
+        "X-API-Key": "jj_your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Option B: Claude Code Plugin
 
 Install as a Claude Code plugin:
 
@@ -41,37 +67,21 @@ claude mcp update-env jobjourney --key JOBJOURNEY_API_KEY=jj_your_api_key_here
 
 ---
 
-### Option B: Claude Code (CLI)
+### Option C: Claude Code (CLI) — Local stdio
 
-Run this command in your terminal:
+Run the plugin locally via npx:
 
 ```bash
 claude mcp add jobjourney \
   -e JOBJOURNEY_API_URL=https://server.jobjourney.me \
   -e JOBJOURNEY_API_KEY=jj_your_api_key_here \
+  -e TRANSPORT=stdio \
   -- npx -y jobjourney-claude-plugin
-```
-
-Or add to `~/.claude.json`:
-
-```json
-{
-  "mcpServers": {
-    "jobjourney": {
-      "command": "npx",
-      "args": ["-y", "jobjourney-claude-plugin"],
-      "env": {
-        "JOBJOURNEY_API_URL": "https://server.jobjourney.me",
-        "JOBJOURNEY_API_KEY": "jj_your_api_key_here"
-      }
-    }
-  }
-}
 ```
 
 ---
 
-### Option C: Claude Desktop (App)
+### Option D: Claude Desktop (App)
 
 Edit your Claude Desktop config file:
 
@@ -86,7 +96,8 @@ Edit your Claude Desktop config file:
       "args": ["-y", "jobjourney-claude-plugin"],
       "env": {
         "JOBJOURNEY_API_URL": "https://server.jobjourney.me",
-        "JOBJOURNEY_API_KEY": "jj_your_api_key_here"
+        "JOBJOURNEY_API_KEY": "jj_your_api_key_here",
+        "TRANSPORT": "stdio"
       }
     }
   }
@@ -172,7 +183,9 @@ Just talk naturally to Claude:
 | Variable | Description |
 |----------|-------------|
 | `JOBJOURNEY_API_URL` | API endpoint (default: https://server.jobjourney.me) |
-| `JOBJOURNEY_API_KEY` | Your API key from JobJourney settings |
+| `JOBJOURNEY_API_KEY` | Your API key (only used in stdio mode) |
+| `TRANSPORT` | Transport type: `httpStream` (default) or `stdio` |
+| `PORT` | HTTP server port (default: 8080, only for httpStream) |
 
 ## Links
 

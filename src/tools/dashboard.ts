@@ -1,15 +1,17 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerDashboardTools(server: FastMCP) {
+export function registerDashboardTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "get_dashboard_stats",
     description:
       "Get an overview of the user's job search progress including job counts by status, scraping metrics, document counts, and feature usage. Great for answering 'how is my job search going?'",
     parameters: z.object({}),
-    execute: async () => {
-      const data = (await apiCall("/api/dashboard/statistics")) as {
+    execute: async (_args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall("/api/dashboard/statistics", {}, apiKey)) as {
         data?: {
           jobStatistics?: {
             total: number; applied: number; interview: number;

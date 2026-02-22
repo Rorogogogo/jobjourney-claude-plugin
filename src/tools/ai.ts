@@ -1,8 +1,9 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerAiTools(server: FastMCP) {
+export function registerAiTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "evaluate_job_fit",
     description:
@@ -14,7 +15,8 @@ export function registerAiTools(server: FastMCP) {
       required_skills: z.string().optional().describe("Required skills for the job"),
       job_id: z.string().optional().describe("Existing job ID to evaluate against (if job is already saved)"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const jobObj: Record<string, string | undefined> = {
         name: args.job_title,
         companyName: args.company,
@@ -26,7 +28,7 @@ export function registerAiTools(server: FastMCP) {
       const data = (await apiCall("/api/ai/evaluate-job-fit?confirmFreeTrial=true", {
         method: "POST",
         body: JSON.stringify({ job: jobObj }),
-      })) as {
+      }, apiKey)) as {
         data?: {
           overallScore?: number;
           summary?: string;
@@ -68,7 +70,8 @@ export function registerAiTools(server: FastMCP) {
       required_skills: z.string().optional().describe("Required skills"),
       job_id: z.string().optional().describe("Existing job ID (to save the cover letter to the job)"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body: Record<string, unknown> = {
         job: {
           name: args.job_title,
@@ -82,7 +85,7 @@ export function registerAiTools(server: FastMCP) {
       const data = (await apiCall("/api/ai/generate-cover-letter-for-job?confirmFreeTrial=true", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: string; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: string; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Cover letter generation failed: ${data.message || data.errorCode}`;
@@ -106,7 +109,8 @@ export function registerAiTools(server: FastMCP) {
         .optional()
         .describe("Type of interview questions (default: Technical)"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body = {
         job: {
           name: args.job_title,
@@ -120,7 +124,7 @@ export function registerAiTools(server: FastMCP) {
       const data = (await apiCall("/api/ai/generate-interview-questions?confirmFreeTrial=true", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: string[]; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: string[]; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Question generation failed: ${data.message || data.errorCode}`;
@@ -150,7 +154,8 @@ export function registerAiTools(server: FastMCP) {
         .optional()
         .describe("Type of interview (default: Technical)"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body = {
         jobId: args.job_id,
         interviewType: args.interview_type || "Technical",
@@ -159,7 +164,7 @@ export function registerAiTools(server: FastMCP) {
       const data = (await apiCall("/api/ai/conduct-mock-interview?confirmFreeTrial=true", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: unknown; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: unknown; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Mock interview failed: ${data.message || data.errorCode}`;
@@ -175,8 +180,9 @@ export function registerAiTools(server: FastMCP) {
     parameters: z.object({
       job_id: z.string().describe("The job ID to get the mock interview report for"),
     }),
-    execute: async (args) => {
-      const data = (await apiCall(`/api/ai/get-mock-interview-report/${args.job_id}`)) as {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
+      const data = (await apiCall(`/api/ai/get-mock-interview-report/${args.job_id}`, {}, apiKey)) as {
         data?: unknown;
         message?: string;
         errorCode?: string;
@@ -198,11 +204,12 @@ export function registerAiTools(server: FastMCP) {
     parameters: z.object({
       receiver_id: z.string().describe("The user ID of the person you want to chat with"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions?confirmFreeTrial=true", {
         method: "POST",
         body: JSON.stringify({ receiverId: args.receiver_id }),
-      })) as { data?: string[] | string; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: string[] | string; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Failed to generate suggestions: ${data.message || data.errorCode}`;

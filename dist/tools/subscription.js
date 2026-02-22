@@ -5,8 +5,9 @@ export function registerSubscriptionTools(server) {
         name: "get_subscription_status",
         description: "Check the user's current subscription status and plan details.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/subscription/status"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/subscription/status", {}, apiKey));
             const sub = data.data;
             if (!sub)
                 return "Could not retrieve subscription status.";
@@ -24,8 +25,9 @@ export function registerSubscriptionTools(server) {
         name: "get_subscription_plans",
         description: "View available subscription plans and pricing.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/subscription/plans"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/subscription/plans", {}, apiKey));
             const plans = data.data || [];
             if (plans.length === 0)
                 return "No subscription plans available.";
@@ -43,8 +45,9 @@ export function registerSubscriptionTools(server) {
         parameters: z.object({
             feature_name: z.string().describe("The feature name to check access for"),
         }),
-        execute: async (args) => {
-            const data = (await apiCall(`/api/subscription/check/${args.feature_name}`));
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, apiKey));
             const access = data.data;
             if (!access)
                 return "Could not check feature access.";
@@ -57,8 +60,9 @@ export function registerSubscriptionTools(server) {
         name: "get_payment_history",
         description: "View the user's payment history.",
         parameters: z.object({}),
-        execute: async () => {
-            const data = (await apiCall("/api/subscription/payments"));
+        execute: async (_args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall("/api/subscription/payments", {}, apiKey));
             const payments = data.data || [];
             if (payments.length === 0)
                 return "No payment history found.";

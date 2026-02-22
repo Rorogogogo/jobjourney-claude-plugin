@@ -1,8 +1,9 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import { apiCall } from "../api.js";
+import { SessionAuth } from "../types.js";
 
-export function registerChatbotTools(server: FastMCP) {
+export function registerChatbotTools(server: FastMCP<SessionAuth>) {
   server.addTool({
     name: "chat",
     description: "Send a message to the JobJourney AI chatbot for career advice, job search tips, or general help.",
@@ -10,14 +11,15 @@ export function registerChatbotTools(server: FastMCP) {
       message: z.string().describe("The message to send to the chatbot"),
       conversation_id: z.string().optional().describe("Conversation ID for continuing a chat"),
     }),
-    execute: async (args) => {
+    execute: async (args, context) => {
+      const apiKey = context.session?.apiKey;
       const body: Record<string, unknown> = { message: args.message };
       if (args.conversation_id) body.conversationId = args.conversation_id;
 
       const data = (await apiCall("/api/chatbot/chat", {
         method: "POST",
         body: JSON.stringify(body),
-      })) as { data?: { response?: string; conversationId?: string }; message?: string; errorCode?: string };
+      }, apiKey)) as { data?: { response?: string; conversationId?: string }; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Chatbot error: ${data.message || data.errorCode}`;

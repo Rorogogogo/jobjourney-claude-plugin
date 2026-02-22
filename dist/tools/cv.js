@@ -9,7 +9,8 @@ export function registerCvTools(server) {
             job_title: z.string().optional().describe("Target job title to tailor the CV for"),
             job_description: z.string().optional().describe("Job description to tailor the CV for"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {};
             if (args.template)
                 body.template = args.template;
@@ -20,7 +21,7 @@ export function registerCvTools(server) {
             const data = (await apiCall("/api/cv/generate", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `CV generation failed: ${data.message || data.errorCode}`;
             }
@@ -38,7 +39,8 @@ export function registerCvTools(server) {
             job_description: z.string().optional().describe("Job description to tailor the CV for"),
             name: z.string().optional().describe("Name for the saved document"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {};
             if (args.template)
                 body.template = args.template;
@@ -51,7 +53,7 @@ export function registerCvTools(server) {
             const data = (await apiCall("/api/cv/generate-and-store", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `CV generation failed: ${data.message || data.errorCode}`;
             }

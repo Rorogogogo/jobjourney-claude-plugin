@@ -11,7 +11,8 @@ export function registerAiTools(server) {
             required_skills: z.string().optional().describe("Required skills for the job"),
             job_id: z.string().optional().describe("Existing job ID to evaluate against (if job is already saved)"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const jobObj = {
                 name: args.job_title,
                 companyName: args.company,
@@ -23,7 +24,7 @@ export function registerAiTools(server) {
             const data = (await apiCall("/api/ai/evaluate-job-fit?confirmFreeTrial=true", {
                 method: "POST",
                 body: JSON.stringify({ job: jobObj }),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Evaluation failed: ${data.message || data.errorCode}`;
             }
@@ -51,7 +52,8 @@ export function registerAiTools(server) {
             required_skills: z.string().optional().describe("Required skills"),
             job_id: z.string().optional().describe("Existing job ID (to save the cover letter to the job)"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {
                 job: {
                     name: args.job_title,
@@ -65,7 +67,7 @@ export function registerAiTools(server) {
             const data = (await apiCall("/api/ai/generate-cover-letter-for-job?confirmFreeTrial=true", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Cover letter generation failed: ${data.message || data.errorCode}`;
             }
@@ -85,7 +87,8 @@ export function registerAiTools(server) {
                 .optional()
                 .describe("Type of interview questions (default: Technical)"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {
                 job: {
                     name: args.job_title,
@@ -98,7 +101,7 @@ export function registerAiTools(server) {
             const data = (await apiCall("/api/ai/generate-interview-questions?confirmFreeTrial=true", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Question generation failed: ${data.message || data.errorCode}`;
             }
@@ -123,7 +126,8 @@ export function registerAiTools(server) {
                 .optional()
                 .describe("Type of interview (default: Technical)"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = {
                 jobId: args.job_id,
                 interviewType: args.interview_type || "Technical",
@@ -131,7 +135,7 @@ export function registerAiTools(server) {
             const data = (await apiCall("/api/ai/conduct-mock-interview?confirmFreeTrial=true", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Mock interview failed: ${data.message || data.errorCode}`;
             }
@@ -144,8 +148,9 @@ export function registerAiTools(server) {
         parameters: z.object({
             job_id: z.string().describe("The job ID to get the mock interview report for"),
         }),
-        execute: async (args) => {
-            const data = (await apiCall(`/api/ai/get-mock-interview-report/${args.job_id}`));
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall(`/api/ai/get-mock-interview-report/${args.job_id}`, {}, apiKey));
             if (data.errorCode) {
                 return `Failed to get report: ${data.message || data.errorCode}`;
             }
@@ -160,11 +165,12 @@ export function registerAiTools(server) {
         parameters: z.object({
             receiver_id: z.string().describe("The user ID of the person you want to chat with"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions?confirmFreeTrial=true", {
                 method: "POST",
                 body: JSON.stringify({ receiverId: args.receiver_id }),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Failed to generate suggestions: ${data.message || data.errorCode}`;
             }

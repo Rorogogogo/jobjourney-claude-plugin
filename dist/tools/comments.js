@@ -8,10 +8,11 @@ export function registerCommentTools(server) {
             page: z.number().optional().describe("Page number (default: 1)"),
             limit: z.number().optional().describe("Number of comments per page (default: 10)"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const page = args.page || 1;
             const limit = args.limit || 10;
-            const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`));
+            const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`, {}, apiKey));
             const comments = data.data?.items || [];
             if (comments.length === 0)
                 return "No community comments found.";
@@ -28,8 +29,9 @@ export function registerCommentTools(server) {
         parameters: z.object({
             comment_id: z.string().describe("The comment ID to view the thread for"),
         }),
-        execute: async (args) => {
-            const data = (await apiCall(`/api/comment/${args.comment_id}/thread`));
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
+            const data = (await apiCall(`/api/comment/${args.comment_id}/thread`, {}, apiKey));
             const thread = data.data;
             if (!thread)
                 return "Comment thread not found.";
@@ -48,14 +50,15 @@ export function registerCommentTools(server) {
             content: z.string().describe("The comment content"),
             parent_id: z.string().optional().describe("Parent comment ID if replying to a comment"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             const body = { content: args.content };
             if (args.parent_id)
                 body.parentId = args.parent_id;
             const data = (await apiCall("/api/comment", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }));
+            }, apiKey));
             if (data.errorCode) {
                 return `Failed to post comment: ${data.message || data.errorCode}`;
             }
@@ -69,11 +72,12 @@ export function registerCommentTools(server) {
             comment_id: z.string().describe("The comment ID to edit"),
             content: z.string().describe("The updated comment content"),
         }),
-        execute: async (args) => {
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
             await apiCall(`/api/comment/${args.comment_id}`, {
                 method: "PUT",
                 body: JSON.stringify({ content: args.content }),
-            });
+            }, apiKey);
             return "Comment updated successfully.";
         },
     });
@@ -83,8 +87,9 @@ export function registerCommentTools(server) {
         parameters: z.object({
             comment_id: z.string().describe("The comment ID to delete"),
         }),
-        execute: async (args) => {
-            await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" });
+        execute: async (args, context) => {
+            const apiKey = context.session?.apiKey;
+            await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" }, apiKey);
             return "Comment deleted successfully.";
         },
     });
