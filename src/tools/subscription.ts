@@ -9,8 +9,8 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     description: "Check the user's current subscription status and plan details.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/subscription/status", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/subscription/status", {}, auth)) as {
         errorCode?: string | null; message?: string; isSuccess?: boolean;
       };
 
@@ -23,8 +23,8 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     description: "View available subscription plans and pricing.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/subscription/plans", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/subscription/plans", {}, auth)) as {
         items?: Array<{
           name: string; price?: number; interval?: string; currency?: string;
           features?: string[]; description?: string;
@@ -52,8 +52,8 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
         .describe("The AI feature to check access for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, auth)) as {
         errorCode?: string | null; message?: string; isSuccess?: boolean;
       };
 
@@ -68,8 +68,8 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     description: "View the user's payment history.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/subscription/payments", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/subscription/payments", {}, auth)) as {
         errorCode?: string | null; message?: string; isSuccess?: boolean;
         subscriptionHistory?: Array<{
           id: string; amount: number; status?: string;

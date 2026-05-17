@@ -8,9 +8,9 @@ export function registerNotificationTools(server) {
             limit: z.number().optional().describe("Maximum number of notifications to return (default: 10)"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const limit = args.limit || 10;
-            const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, apiKey));
+            const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, auth));
             const notifications = data.items || [];
             if (notifications.length === 0) {
                 return "No notifications.";
@@ -30,8 +30,8 @@ export function registerNotificationTools(server) {
         description: "Mark all notifications as read.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall("/api/notification/read-all", { method: "PUT" }, apiKey);
+            const auth = context.session;
+            await apiCall("/api/notification/read-all", { method: "PUT" }, auth);
             return "All notifications marked as read.";
         },
     });
@@ -40,8 +40,8 @@ export function registerNotificationTools(server) {
         description: "Get the count of unread notifications.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/notification/count", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/notification/count", {}, auth));
             return `Unread notifications: ${data.data ?? 0}`;
         },
     });
@@ -52,8 +52,8 @@ export function registerNotificationTools(server) {
             notification_id: z.string().describe("The notification ID to mark as read"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, apiKey);
+            const auth = context.session;
+            await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, auth);
             return "Notification marked as read.";
         },
     });
@@ -64,8 +64,8 @@ export function registerNotificationTools(server) {
             notification_id: z.string().describe("The notification ID to delete"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, apiKey);
+            const auth = context.session;
+            await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, auth);
             return "Notification deleted.";
         },
     });

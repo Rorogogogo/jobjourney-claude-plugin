@@ -19,12 +19,20 @@ import { registerLocalScrapingTools } from "./tools/local-scraping.js";
 import { registerAutoApplyTools } from "./auto-apply/tools.js";
 import { SessionAuth } from "./types.js";
 import { PLUGIN_NAME, PLUGIN_VERSION } from "./version.js";
+import { API_BASE_URL } from "./api.js";
 
 const transport = (process.env.TRANSPORT || "stdio") as "httpStream" | "stdio";
 
 const server = new FastMCP<SessionAuth>({
   name: PLUGIN_NAME,
   version: PLUGIN_VERSION as `${number}.${number}.${number}`,
+  oauth: {
+    enabled: true,
+    protectedResource: {
+      resource: API_BASE_URL,
+      authorizationServers: [API_BASE_URL],
+    },
+  },
   authenticate: async (request): Promise<SessionAuth> => {
     // stdio transport: request is undefined, read API key from env
     if (!request) {
@@ -35,23 +43,24 @@ const server = new FastMCP<SessionAuth>({
       return { apiKey: envKey };
     }
 
-    // HTTP transport: read API key from headers
-    const auth = request.headers.authorization;
+    // HTTP transport: detect OAuth bearer vs API key.
+    const authHeader = request.headers.authorization;
     const xApiKey = request.headers["x-api-key"];
 
-    let apiKey: string | undefined;
-
-    if (auth && auth.startsWith("Bearer ")) {
-      apiKey = auth.slice(7).trim();
-    } else if (typeof xApiKey === "string") {
-      apiKey = xApiKey.trim();
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7).trim();
+      if (token.startsWith("jj_oat_")) {
+        return { accessToken: token };
+      }
+      return { apiKey: token };
+    }
+    if (typeof xApiKey === "string" && xApiKey.trim()) {
+      return { apiKey: xApiKey.trim() };
     }
 
-    if (!apiKey) {
-      throw new Error("Missing API key. Provide Authorization: Bearer <key> or X-API-Key header.");
-    }
-
-    return { apiKey };
+    throw new Error(
+      "Missing credentials. Provide Authorization: Bearer <jj_oat_... or api-key> or X-API-Key header."
+    );
   },
 });
 

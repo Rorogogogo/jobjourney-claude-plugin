@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiCall, API_BASE_URL } from "../api.js";
+import { apiCall, API_BASE_URL, getAuthHeaders } from "../api.js";
 import { JOB_STATUS, STATUS_TEXT, STATUS_MAP } from "../constants.js";
 export function registerJobTools(server) {
     server.addTool({
@@ -19,7 +19,7 @@ export function registerJobTools(server) {
             is_starred: z.boolean().optional().describe("Mark as important/starred (default: false)"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const formData = new FormData();
             formData.append("Name", args.title);
             formData.append("CompanyName", args.company);
@@ -35,7 +35,7 @@ export function registerJobTools(server) {
             formData.append("IsStarred", String(args.is_starred || false));
             const result = await fetch(`${API_BASE_URL}/api/Job/manually-save`, {
                 method: "POST",
-                headers: { ...(apiKey && { "X-API-Key": apiKey }) },
+                headers: getAuthHeaders(auth),
                 body: formData,
             });
             const data = await result.json();
@@ -57,7 +57,7 @@ export function registerJobTools(server) {
             limit: z.number().optional().describe("Maximum number of jobs to return (default: 10)"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const params = new URLSearchParams();
             params.append("pageNumber", "1");
             params.append("pageSize", String(args.limit || 10));
@@ -67,7 +67,7 @@ export function registerJobTools(server) {
                 params.append("status", String(STATUS_MAP[args.status]));
             if (args.starred_only)
                 params.append("isStarred", "true");
-            const data = (await apiCall(`/api/Job?${params.toString()}`, {}, apiKey));
+            const data = (await apiCall(`/api/Job?${params.toString()}`, {}, auth));
             if (!data.items || data.items.length === 0) {
                 return "No jobs found matching your criteria.";
             }
@@ -89,8 +89,8 @@ export function registerJobTools(server) {
             job_id: z.string().describe("The job ID to get details for"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/Job/${args.job_id}`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/Job/${args.job_id}`, {}, auth));
             const job = data.data;
             if (!job)
                 return "Job not found.";
@@ -122,12 +122,12 @@ export function registerJobTools(server) {
                 .describe("New status for the job"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const newStatus = STATUS_MAP[args.status];
             if (newStatus === undefined) {
                 return `Invalid status: ${args.status}. Valid options: saved, applied, initial_interview, final_interview, offered, rejected, expired`;
             }
-            await apiCall(`/api/Job/${args.job_id}/status/${newStatus}`, { method: "PUT" }, apiKey);
+            await apiCall(`/api/Job/${args.job_id}/status/${newStatus}`, { method: "PUT" }, auth);
             return `Job status updated to: ${STATUS_TEXT[newStatus]}`;
         },
     });
@@ -138,8 +138,8 @@ export function registerJobTools(server) {
             job_id: z.string().describe("The job ID to delete"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall(`/api/Job/${args.job_id}`, { method: "DELETE" }, apiKey);
+            const auth = context.session;
+            await apiCall(`/api/Job/${args.job_id}`, { method: "DELETE" }, auth);
             return "Job deleted successfully.";
         },
     });
@@ -151,11 +151,11 @@ export function registerJobTools(server) {
             is_starred: z.boolean().describe("true to star, false to unstar"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             await apiCall(`/api/Job/${args.job_id}/star`, {
                 method: "PUT",
                 body: JSON.stringify({ isStarred: args.is_starred }),
-            }, apiKey);
+            }, auth);
             return `Job ${args.is_starred ? "starred ⭐" : "unstarred"} successfully.`;
         },
     });
@@ -167,11 +167,11 @@ export function registerJobTools(server) {
             content: z.string().describe("The note content"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const data = (await apiCall(`/api/Job/${args.job_id}/notes`, {
                 method: "POST",
                 body: JSON.stringify({ content: args.content }),
-            }, apiKey));
+            }, auth));
             return `Note added to job successfully.${data.data?.id ? `\nNote ID: ${data.data.id}` : ""}`;
         },
     });
@@ -184,11 +184,11 @@ export function registerJobTools(server) {
             content: z.string().describe("The updated note content"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, {
                 method: "PUT",
                 body: JSON.stringify({ content: args.content }),
-            }, apiKey);
+            }, auth);
             return "Note updated successfully.";
         },
     });
@@ -200,8 +200,8 @@ export function registerJobTools(server) {
             note_id: z.string().describe("The note ID to delete"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, apiKey);
+            const auth = context.session;
+            await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, auth);
             return "Note deleted successfully.";
         },
     });
@@ -212,8 +212,8 @@ export function registerJobTools(server) {
             job_id: z.string().describe("The job ID to get evaluation for"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/Job/${args.job_id}/cv-evaluation`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/Job/${args.job_id}/cv-evaluation`, {}, auth));
             const eval_ = data.data;
             if (!eval_)
                 return "No evaluation found for this job.";
@@ -235,8 +235,8 @@ export function registerJobTools(server) {
             job_id: z.string().describe("The job ID to get cover letter for"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/Job/${args.job_id}/cover-letter`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/Job/${args.job_id}/cover-letter`, {}, auth));
             if (!data.data)
                 return "No cover letter found for this job.";
             return data.data;
@@ -252,7 +252,7 @@ export function registerJobTools(server) {
                 .describe("Action to perform: delete (remove), reject (mark as not a fit), proceed (advance to next stage)"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const actionMap = {
                 delete: "/api/bulk-job/delete",
                 reject: "/api/bulk-job/reject",
@@ -264,7 +264,7 @@ export function registerJobTools(server) {
             await apiCall(endpoint, {
                 method: "POST",
                 body: JSON.stringify({ jobIds: args.job_ids }),
-            }, apiKey);
+            }, auth);
             const actionText = {
                 delete: "deleted",
                 reject: "marked as rejected",

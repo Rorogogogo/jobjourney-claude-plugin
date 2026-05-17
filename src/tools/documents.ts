@@ -14,12 +14,12 @@ export function registerDocumentTools(server: FastMCP<SessionAuth>) {
         .describe("Type of documents to list (default: all)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const docType = args.type || "all";
       const results: string[] = [];
 
       if (docType === "all" || docType === "cvs") {
-        const cvData = (await apiCall("/api/document/cvs", {}, apiKey)) as {
+        const cvData = (await apiCall("/api/document/cvs", {}, auth)) as {
           items?: Array<{ id: string; name: string; createdOnUtc: string; isPrimary?: boolean; fileUrl?: string }>;
         };
         const cvs = cvData.items || [];
@@ -37,7 +37,7 @@ export function registerDocumentTools(server: FastMCP<SessionAuth>) {
       }
 
       if (docType === "all" || docType === "cover-letters") {
-        const clData = (await apiCall("/api/document/cover-letters", {}, apiKey)) as {
+        const clData = (await apiCall("/api/document/cover-letters", {}, auth)) as {
           items?: Array<{ id: string; name: string; createdOnUtc: string }>;
         };
         const cls = clData.items || [];
@@ -62,8 +62,8 @@ export function registerDocumentTools(server: FastMCP<SessionAuth>) {
       document_id: z.string().describe("The document ID"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/document/${args.document_id}`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/document/${args.document_id}`, {}, auth)) as {
         data?: {
           id: string; name: string; content?: string; type?: string;
           createdOnUtc: string; updatedOnUtc?: string;
@@ -92,8 +92,8 @@ export function registerDocumentTools(server: FastMCP<SessionAuth>) {
       type: z.enum(["cv", "cover-letter"]).describe("Type of document to delete"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, auth);
       return "Document deleted successfully.";
     },
   });
@@ -106,11 +106,11 @@ export function registerDocumentTools(server: FastMCP<SessionAuth>) {
       name: z.string().describe("The new name for the document"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall(`/api/document/rename/${args.document_id}`, {
         method: "PUT",
         body: JSON.stringify({ name: args.name }),
-      }, apiKey);
+      }, auth);
       return `Document renamed to "${args.name}" successfully.`;
     },
   });

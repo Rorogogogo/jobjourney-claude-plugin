@@ -10,8 +10,8 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       "Get the user's profile information including skills, experience, education, and projects.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const p = (await apiCall("/api/profile", {}, apiKey)) as {
+      const auth = context.session;
+      const p = (await apiCall("/api/profile", {}, auth)) as {
         firstName?: string; lastName?: string; email?: string;
         title?: string; headline?: string; bio?: string; location?: string;
         skills?: Array<{ name: string }>;
@@ -58,7 +58,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       location: z.string().optional().describe("Location"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const body: Record<string, string> = {};
       if (args.first_name) body.firstName = args.first_name;
       if (args.last_name) body.lastName = args.last_name;
@@ -69,7 +69,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       await apiCall("/api/profile/basic", {
         method: "PUT",
         body: JSON.stringify(body),
-      }, apiKey);
+      }, auth);
       return "Basic profile information updated successfully.";
     },
   });
@@ -83,11 +83,11 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       ).describe("List of skills"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall("/api/profile/skills", {
         method: "PUT",
         body: JSON.stringify({ skills: args.skills }),
-      }, apiKey);
+      }, auth);
       return "Skills updated successfully.";
     },
   });
@@ -107,11 +107,11 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       ).describe("List of employment entries"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall("/api/profile/employment", {
         method: "PUT",
         body: JSON.stringify({ employments: args.employments }),
-      }, apiKey);
+      }, auth);
       return "Employment history updated successfully.";
     },
   });
@@ -131,11 +131,11 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       ).describe("List of education entries"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall("/api/profile/education", {
         method: "PUT",
         body: JSON.stringify({ educations: args.educations }),
-      }, apiKey);
+      }, auth);
       return "Education history updated successfully.";
     },
   });
@@ -154,11 +154,11 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       ).describe("List of projects"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall("/api/profile/projects", {
         method: "PUT",
         body: JSON.stringify({ projects: args.projects }),
-      }, apiKey);
+      }, auth);
       return "Projects updated successfully.";
     },
   });
@@ -178,11 +178,11 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       ).describe("List of references"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall("/api/profile/references", {
         method: "PUT",
         body: JSON.stringify({ references: args.references }),
-      }, apiKey);
+      }, auth);
       return "References updated successfully.";
     },
   });
@@ -218,7 +218,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       })).optional().describe("References list"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const body: Record<string, unknown> = {};
       if (args.first_name) body.firstName = args.first_name;
       if (args.last_name) body.lastName = args.last_name;
@@ -234,7 +234,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       await apiCall("/api/profile/full", {
         method: "PUT",
         body: JSON.stringify(body),
-      }, apiKey);
+      }, auth);
       return "Full profile updated successfully.";
     },
   });
@@ -246,8 +246,8 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       identifier: z.string().describe("Portfolio identifier (username or slug)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`, {}, auth)) as {
         data?: {
           displayName?: string; headline?: string; bio?: string;
           skills?: Array<{ name: string }>;

@@ -135,20 +135,20 @@ export function registerAutoApplyTools(server: FastMCP<SessionAuth>): void {
     }),
     execute: async (args, context) => {
       const page = requireActivePage();
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
 
       let fileUrl: string;
       let fileName: string;
 
       if (args.document_id) {
-        const doc = (await apiCall(`/api/document/${args.document_id}`, {}, apiKey)) as {
+        const doc = (await apiCall(`/api/document/${args.document_id}`, {}, auth)) as {
           data?: { fileUrl?: string; name?: string; fileType?: string };
         };
         if (!doc.data?.fileUrl) throw new Error("Document not found or has no file URL.");
         fileUrl = doc.data.fileUrl;
         fileName = doc.data.name || "resume";
       } else {
-        const cvData = (await apiCall("/api/document/cvs", {}, apiKey)) as {
+        const cvData = (await apiCall("/api/document/cvs", {}, auth)) as {
           items?: Array<{ id: string; name: string; fileUrl?: string; isPrimary?: boolean; fileType?: string }>;
         };
         const cvs = cvData.items || [];
@@ -227,10 +227,10 @@ export function registerAutoApplyTools(server: FastMCP<SessionAuth>): void {
       document_id: z.string().describe("The CV document ID to set as primary"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const result = (await apiCall(`/api/document/${args.document_id}/set-primary`, {
         method: "PUT",
-      }, apiKey)) as { data?: { name?: string }; errorCode?: string; message?: string };
+      }, auth)) as { data?: { name?: string }; errorCode?: string; message?: string };
 
       if (result.errorCode) {
         throw new Error(result.message || "Failed to set primary CV");

@@ -12,10 +12,10 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       limit: z.number().optional().describe("Number of comments per page (default: 10)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const page = args.page || 1;
       const limit = args.limit || 10;
-      const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`, {}, apiKey)) as {
+      const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`, {}, auth)) as {
         data?: {
           items?: Array<{
             id: string; content: string; authorDisplayName?: string;
@@ -44,8 +44,8 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       comment_id: z.string().describe("The comment ID to view the thread for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/comment/${args.comment_id}/thread`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/comment/${args.comment_id}/thread`, {}, auth)) as {
         data?: {
           id: string; content: string; authorDisplayName?: string;
           createdOnUtc: string;
@@ -79,14 +79,14 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       parent_id: z.string().optional().describe("Parent comment ID if replying to a comment"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const body: Record<string, string> = { content: args.content };
       if (args.parent_id) body.parentId = args.parent_id;
 
       const data = (await apiCall("/api/comment", {
         method: "POST",
         body: JSON.stringify(body),
-      }, apiKey)) as { data?: { id: string }; message?: string; errorCode?: string };
+      }, auth)) as { data?: { id: string }; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Failed to post comment: ${data.message || data.errorCode}`;
@@ -104,11 +104,11 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       content: z.string().describe("The updated comment content"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall(`/api/comment/${args.comment_id}`, {
         method: "PUT",
         body: JSON.stringify({ content: args.content }),
-      }, apiKey);
+      }, auth);
       return "Comment updated successfully.";
     },
   });
@@ -120,8 +120,8 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       comment_id: z.string().describe("The comment ID to delete"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" }, auth);
       return "Comment deleted successfully.";
     },
   });

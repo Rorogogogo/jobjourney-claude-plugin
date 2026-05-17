@@ -6,8 +6,8 @@ export function registerSubscriptionTools(server) {
         description: "Check the user's current subscription status and plan details.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/subscription/status", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/subscription/status", {}, auth));
             return `Subscription Status: ${data.message || "Unknown"}`;
         },
     });
@@ -16,8 +16,8 @@ export function registerSubscriptionTools(server) {
         description: "View available subscription plans and pricing.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/subscription/plans", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/subscription/plans", {}, auth));
             const plans = data.items || [];
             if (plans.length === 0)
                 return "No subscription plans available.";
@@ -37,8 +37,8 @@ export function registerSubscriptionTools(server) {
                 .describe("The AI feature to check access for"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, auth));
             return data.isSuccess
                 ? `You have access to "${args.feature_name}".`
                 : `You do not have access to "${args.feature_name}".${data.message ? ` Reason: ${data.message}` : ""}`;
@@ -49,8 +49,8 @@ export function registerSubscriptionTools(server) {
         description: "View the user's payment history.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/subscription/payments", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/subscription/payments", {}, auth));
             if (data.errorCode) {
                 return `Unable to retrieve payment history: ${data.message || data.errorCode}`;
             }

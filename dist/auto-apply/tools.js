@@ -115,18 +115,18 @@ export function registerAutoApplyTools(server) {
         }),
         execute: async (args, context) => {
             const page = requireActivePage();
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             let fileUrl;
             let fileName;
             if (args.document_id) {
-                const doc = (await apiCall(`/api/document/${args.document_id}`, {}, apiKey));
+                const doc = (await apiCall(`/api/document/${args.document_id}`, {}, auth));
                 if (!doc.data?.fileUrl)
                     throw new Error("Document not found or has no file URL.");
                 fileUrl = doc.data.fileUrl;
                 fileName = doc.data.name || "resume";
             }
             else {
-                const cvData = (await apiCall("/api/document/cvs", {}, apiKey));
+                const cvData = (await apiCall("/api/document/cvs", {}, auth));
                 const cvs = cvData.items || [];
                 const primary = cvs.find((c) => c.isPrimary) || cvs[0];
                 if (!primary)
@@ -197,10 +197,10 @@ export function registerAutoApplyTools(server) {
             document_id: z.string().describe("The CV document ID to set as primary"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const result = (await apiCall(`/api/document/${args.document_id}/set-primary`, {
                 method: "PUT",
-            }, apiKey));
+            }, auth));
             if (result.errorCode) {
                 throw new Error(result.message || "Failed to set primary CV");
             }

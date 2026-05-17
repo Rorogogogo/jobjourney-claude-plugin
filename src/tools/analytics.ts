@@ -9,8 +9,8 @@ export function registerAnalyticsTools(server: FastMCP<SessionAuth>) {
     description: "Get the user's portfolio visit count.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/profile/portfolio/visits", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/profile/portfolio/visits", {}, auth)) as {
         data?: { totalVisits?: number; visitsThisMonth?: number; visitsThisWeek?: number };
       };
 
@@ -33,8 +33,8 @@ export function registerAnalyticsTools(server: FastMCP<SessionAuth>) {
       report_slug: z.string().describe("The portfolio slug to get analytics for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/report-tracking/analytics/${args.report_slug}`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/report-tracking/analytics/${args.report_slug}`, {}, auth)) as {
         data?: unknown;
       };
 

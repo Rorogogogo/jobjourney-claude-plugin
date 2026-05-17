@@ -6,8 +6,8 @@ export function registerAnalyticsTools(server) {
         description: "Get the user's portfolio visit count.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/profile/portfolio/visits", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/profile/portfolio/visits", {}, auth));
             const visits = data.data;
             if (!visits)
                 return "Could not retrieve portfolio visit data.";
@@ -26,8 +26,8 @@ export function registerAnalyticsTools(server) {
             report_slug: z.string().describe("The portfolio slug to get analytics for"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/report-tracking/analytics/${args.report_slug}`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/report-tracking/analytics/${args.report_slug}`, {}, auth));
             if (!data.data)
                 return "Could not retrieve portfolio analytics.";
             return typeof data.data === "string" ? data.data : JSON.stringify(data.data, null, 2);
