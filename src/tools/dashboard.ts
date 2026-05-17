@@ -10,8 +10,8 @@ export function registerDashboardTools(server: FastMCP<SessionAuth>) {
       "Get an overview of the user's job search progress including job counts by status, scraping metrics, document counts, and feature usage. Great for answering 'how is my job search going?'",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const stats = (await apiCall("/api/dashboard/statistics", {}, apiKey)) as {
+      const auth = context.session;
+      const stats = (await apiCall("/api/dashboard/statistics", {}, auth)) as {
         jobStatistics?: {
           total: number; applied: number; initialInterview: number; finalInterview: number;
           offer: number; rejected: number; starred: number; savedOnly: number;

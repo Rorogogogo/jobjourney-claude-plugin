@@ -12,14 +12,14 @@ export function registerChatbotTools(server: FastMCP<SessionAuth>) {
       conversation_id: z.string().optional().describe("Conversation ID for continuing a chat"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const body: Record<string, unknown> = { message: args.message };
       if (args.conversation_id) body.conversationId = args.conversation_id;
 
       const data = (await apiCall("/api/chatbot/chat", {
         method: "POST",
         body: JSON.stringify(body),
-      }, apiKey)) as { data?: { response?: string; conversationId?: string }; message?: string; errorCode?: string };
+      }, auth)) as { data?: { response?: string; conversationId?: string }; message?: string; errorCode?: string };
 
       if (data.errorCode) {
         return `Chatbot error: ${data.message || data.errorCode}`;

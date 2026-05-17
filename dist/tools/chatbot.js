@@ -9,14 +9,14 @@ export function registerChatbotTools(server) {
             conversation_id: z.string().optional().describe("Conversation ID for continuing a chat"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const body = { message: args.message };
             if (args.conversation_id)
                 body.conversationId = args.conversation_id;
             const data = (await apiCall("/api/chatbot/chat", {
                 method: "POST",
                 body: JSON.stringify(body),
-            }, apiKey));
+            }, auth));
             if (data.errorCode) {
                 return `Chatbot error: ${data.message || data.errorCode}`;
             }

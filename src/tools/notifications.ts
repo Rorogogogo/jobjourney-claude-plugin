@@ -12,9 +12,9 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
       limit: z.number().optional().describe("Maximum number of notifications to return (default: 10)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const limit = args.limit || 10;
-      const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, apiKey)) as {
+      const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, auth)) as {
         items?: Array<{
           id: string; message: string;
           isRead: boolean; createdOnUtc: string; type?: string;
@@ -45,8 +45,8 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     description: "Mark all notifications as read.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall("/api/notification/read-all", { method: "PUT" }, apiKey);
+      const auth = context.session;
+      await apiCall("/api/notification/read-all", { method: "PUT" }, auth);
       return "All notifications marked as read.";
     },
   });
@@ -56,8 +56,8 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     description: "Get the count of unread notifications.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/notification/count", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/notification/count", {}, auth)) as {
         data?: number;
       };
       return `Unread notifications: ${data.data ?? 0}`;
@@ -71,8 +71,8 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
       notification_id: z.string().describe("The notification ID to mark as read"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, auth);
       return "Notification marked as read.";
     },
   });
@@ -84,8 +84,8 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
       notification_id: z.string().describe("The notification ID to delete"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, auth);
       return "Notification deleted.";
     },
   });

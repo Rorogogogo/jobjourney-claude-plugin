@@ -11,11 +11,11 @@ export function registerDocumentTools(server) {
                 .describe("Type of documents to list (default: all)"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             const docType = args.type || "all";
             const results = [];
             if (docType === "all" || docType === "cvs") {
-                const cvData = (await apiCall("/api/document/cvs", {}, apiKey));
+                const cvData = (await apiCall("/api/document/cvs", {}, auth));
                 const cvs = cvData.items || [];
                 if (cvs.length > 0) {
                     results.push("CVs:");
@@ -29,7 +29,7 @@ export function registerDocumentTools(server) {
                 }
             }
             if (docType === "all" || docType === "cover-letters") {
-                const clData = (await apiCall("/api/document/cover-letters", {}, apiKey));
+                const clData = (await apiCall("/api/document/cover-letters", {}, auth));
                 const cls = clData.items || [];
                 if (cls.length > 0) {
                     results.push("\nCover Letters:");
@@ -51,8 +51,8 @@ export function registerDocumentTools(server) {
             document_id: z.string().describe("The document ID"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall(`/api/document/${args.document_id}`, {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall(`/api/document/${args.document_id}`, {}, auth));
             const doc = data.data;
             if (!doc)
                 return "Document not found.";
@@ -74,8 +74,8 @@ export function registerDocumentTools(server) {
             type: z.enum(["cv", "cover-letter"]).describe("Type of document to delete"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
-            await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, apiKey);
+            const auth = context.session;
+            await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, auth);
             return "Document deleted successfully.";
         },
     });
@@ -87,11 +87,11 @@ export function registerDocumentTools(server) {
             name: z.string().describe("The new name for the document"),
         }),
         execute: async (args, context) => {
-            const apiKey = context.session?.apiKey;
+            const auth = context.session;
             await apiCall(`/api/document/rename/${args.document_id}`, {
                 method: "PUT",
                 body: JSON.stringify({ name: args.name }),
-            }, apiKey);
+            }, auth);
             return `Document renamed to "${args.name}" successfully.`;
         },
     });

@@ -1,6 +1,6 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
-import { apiCall, API_BASE_URL } from "../api.js";
+import { apiCall, API_BASE_URL, getAuthHeaders } from "../api.js";
 import { JOB_STATUS, STATUS_TEXT, STATUS_MAP } from "../constants.js";
 import { SessionAuth } from "../types.js";
 
@@ -23,7 +23,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       is_starred: z.boolean().optional().describe("Mark as important/starred (default: false)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const formData = new FormData();
       formData.append("Name", args.title);
       formData.append("CompanyName", args.company);
@@ -37,7 +37,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
 
       const result = await fetch(`${API_BASE_URL}/api/Job/manually-save`, {
         method: "POST",
-        headers: { ...(apiKey && { "X-API-Key": apiKey }) },
+        headers: getAuthHeaders(auth),
         body: formData,
       });
       const data = await result.json();
@@ -62,7 +62,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       limit: z.number().optional().describe("Maximum number of jobs to return (default: 10)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const params = new URLSearchParams();
       params.append("pageNumber", "1");
       params.append("pageSize", String(args.limit || 10));
@@ -70,7 +70,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       if (args.status) params.append("status", String(STATUS_MAP[args.status]));
       if (args.starred_only) params.append("isStarred", "true");
 
-      const data = (await apiCall(`/api/Job?${params.toString()}`, {}, apiKey)) as {
+      const data = (await apiCall(`/api/Job?${params.toString()}`, {}, auth)) as {
         items?: Array<{
           id: string; name: string; companyName: string; status: string;
           isStarred: boolean; createdOnUtc: string; location?: string;
@@ -103,8 +103,8 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       job_id: z.string().describe("The job ID to get details for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/Job/${args.job_id}`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/Job/${args.job_id}`, {}, auth)) as {
         data?: {
           id: string; name: string; companyName: string; status: string;
           isStarred: boolean; location?: string; description?: string;
@@ -148,12 +148,12 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
         .describe("New status for the job"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const newStatus = STATUS_MAP[args.status];
       if (newStatus === undefined) {
         return `Invalid status: ${args.status}. Valid options: saved, applied, initial_interview, final_interview, offered, rejected, expired`;
       }
-      await apiCall(`/api/Job/${args.job_id}/status/${newStatus}`, { method: "PUT" }, apiKey);
+      await apiCall(`/api/Job/${args.job_id}/status/${newStatus}`, { method: "PUT" }, auth);
       return `Job status updated to: ${STATUS_TEXT[newStatus]}`;
     },
   });
@@ -165,8 +165,8 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       job_id: z.string().describe("The job ID to delete"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/Job/${args.job_id}`, { method: "DELETE" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/Job/${args.job_id}`, { method: "DELETE" }, auth);
       return "Job deleted successfully.";
     },
   });
@@ -179,11 +179,11 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       is_starred: z.boolean().describe("true to star, false to unstar"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall(`/api/Job/${args.job_id}/star`, {
         method: "PUT",
         body: JSON.stringify({ isStarred: args.is_starred }),
-      }, apiKey);
+      }, auth);
       return `Job ${args.is_starred ? "starred ⭐" : "unstarred"} successfully.`;
     },
   });
@@ -197,11 +197,11 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       content: z.string().describe("The note content"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const data = (await apiCall(`/api/Job/${args.job_id}/notes`, {
         method: "POST",
         body: JSON.stringify({ content: args.content }),
-      }, apiKey)) as { data?: { id: string; content: string } };
+      }, auth)) as { data?: { id: string; content: string } };
 
       return `Note added to job successfully.${data.data?.id ? `\nNote ID: ${data.data.id}` : ""}`;
     },
@@ -216,11 +216,11 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       content: z.string().describe("The updated note content"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, {
         method: "PUT",
         body: JSON.stringify({ content: args.content }),
-      }, apiKey);
+      }, auth);
       return "Note updated successfully.";
     },
   });
@@ -233,8 +233,8 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       note_id: z.string().describe("The note ID to delete"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, apiKey);
+      const auth = context.session;
+      await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, auth);
       return "Note deleted successfully.";
     },
   });
@@ -246,8 +246,8 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       job_id: z.string().describe("The job ID to get evaluation for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/Job/${args.job_id}/cv-evaluation`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/Job/${args.job_id}/cv-evaluation`, {}, auth)) as {
         data?: {
           overallScore?: number;
           summary?: string;
@@ -279,8 +279,8 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       job_id: z.string().describe("The job ID to get cover letter for"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall(`/api/Job/${args.job_id}/cover-letter`, {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall(`/api/Job/${args.job_id}/cover-letter`, {}, auth)) as {
         data?: string;
       };
 
@@ -300,7 +300,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
         .describe("Action to perform: delete (remove), reject (mark as not a fit), proceed (advance to next stage)"),
     }),
     execute: async (args, context) => {
-      const apiKey = context.session?.apiKey;
+      const auth = context.session;
       const actionMap: Record<string, string> = {
         delete: "/api/bulk-job/delete",
         reject: "/api/bulk-job/reject",
@@ -312,7 +312,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       await apiCall(endpoint, {
         method: "POST",
         body: JSON.stringify({ jobIds: args.job_ids }),
-      }, apiKey);
+      }, auth);
 
       const actionText: Record<string, string> = {
         delete: "deleted",

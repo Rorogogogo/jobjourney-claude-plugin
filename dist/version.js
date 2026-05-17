@@ -14,4 +14,4 @@ function loadVersion() {
         return "0.0.0";
     }
 }
-export const PLUGIN_VERSION = "3.1.35";
+export const PLUGIN_VERSION = "3.2.0";

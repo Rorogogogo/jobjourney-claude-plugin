@@ -9,8 +9,8 @@ export function registerScrapingTools(server: FastMCP<SessionAuth>) {
     description: "View job scraping statistics from the browser extension.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/scraping-statistics", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/scraping-statistics", {}, auth)) as {
         items?: Array<{
           id: string; country?: string; jobTitle?: string; location?: string;
           platforms?: string; jobsFound: number; totalScrapedCount: number;
@@ -35,8 +35,8 @@ export function registerScrapingTools(server: FastMCP<SessionAuth>) {
     description: "View aggregated scraping statistics with breakdowns by website and time period.",
     parameters: z.object({}),
     execute: async (_args, context) => {
-      const apiKey = context.session?.apiKey;
-      const data = (await apiCall("/api/scraping-statistics/aggregated", {}, apiKey)) as {
+      const auth = context.session;
+      const data = (await apiCall("/api/scraping-statistics/aggregated", {}, auth)) as {
         jobsFound?: number; totalScrapedCount?: number;
       };
 

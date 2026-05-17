@@ -6,8 +6,8 @@ export function registerScrapingTools(server) {
         description: "View job scraping statistics from the browser extension.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/scraping-statistics", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/scraping-statistics", {}, auth));
             const items = data.items || [];
             if (items.length === 0)
                 return "No scraping statistics found.";
@@ -20,8 +20,8 @@ export function registerScrapingTools(server) {
         description: "View aggregated scraping statistics with breakdowns by website and time period.",
         parameters: z.object({}),
         execute: async (_args, context) => {
-            const apiKey = context.session?.apiKey;
-            const data = (await apiCall("/api/scraping-statistics/aggregated", {}, apiKey));
+            const auth = context.session;
+            const data = (await apiCall("/api/scraping-statistics/aggregated", {}, auth));
             if (!data)
                 return "Could not retrieve aggregated scraping statistics.";
             return `Aggregated Scraping Stats:\n  Total jobs found: ${data.jobsFound ?? 0}\n  Total scraped: ${data.totalScrapedCount ?? 0}`;
