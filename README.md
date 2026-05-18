@@ -3,7 +3,7 @@
 > A production-ready MCP server for JobJourney with AI job-search tools, local job discovery, and scheduled scraping from Claude.
 
 [![npm version](https://img.shields.io/npm/v/jobjourney-claude-plugin)](https://www.npmjs.com/package/jobjourney-claude-plugin)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE) [![Commercial License](https://img.shields.io/badge/license-Commercial-orange.svg)](COMMERCIAL.md)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)
 ![Protocol](https://img.shields.io/badge/protocol-MCP-7c3aed)
 [![GitHub stars](https://img.shields.io/github/stars/Rorogogogo/jobjourney-claude-plugin?style=social)](https://github.com/Rorogogogo/jobjourney-claude-plugin)
@@ -289,7 +289,7 @@ git commit -m "feat: my change"
 
 ## 📄 License
 
-[MIT](LICENSE) © JobJourney
+[AGPL-3.0](LICENSE) + [Commercial](COMMERCIAL.md) © JobJourney
 
 ## License
 
