@@ -28,7 +28,7 @@
     "ai-assistant"
   ],
   "author": "JobJourney",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/Rorogogogo/jobjourney-claude-plugin"
