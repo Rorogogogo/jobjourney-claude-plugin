@@ -10,7 +10,7 @@ export function registerNotificationTools(server) {
         execute: async (args, context) => {
             const auth = context.session;
             const limit = args.limit || 10;
-            const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, auth));
+            const data = (await apiCall(`/api/v2/notifications?page=1&pageSize=${limit}`, {}, auth));
             const notifications = data.items || [];
             if (notifications.length === 0) {
                 return "No notifications.";
@@ -31,7 +31,7 @@ export function registerNotificationTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            await apiCall("/api/notification/read-all", { method: "PUT" }, auth);
+            await apiCall("/api/v2/notifications/read-all", { method: "PUT" }, auth);
             return "All notifications marked as read.";
         },
     });
@@ -41,7 +41,7 @@ export function registerNotificationTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/notification/count", {}, auth));
+            const data = (await apiCall("/api/v2/notifications/count", {}, auth));
             return `Unread notifications: ${data.data ?? 0}`;
         },
     });
@@ -53,7 +53,7 @@ export function registerNotificationTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, auth);
+            await apiCall(`/api/v2/notifications/${args.notification_id}/read`, { method: "PUT" }, auth);
             return "Notification marked as read.";
         },
     });
@@ -65,7 +65,7 @@ export function registerNotificationTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, auth);
+            await apiCall(`/api/v2/notifications/${args.notification_id}`, { method: "DELETE" }, auth);
             return "Notification deleted.";
         },
     });

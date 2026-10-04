@@ -1,6 +1,6 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiCall, apiData } from "../api.js";
 import { SessionAuth } from "../types.js";
 
 export function registerProfileTools(server: FastMCP<SessionAuth>) {
@@ -11,14 +11,14 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const p = (await apiCall("/api/profile", {}, auth)) as {
+      const p = await apiData<{
         firstName?: string; lastName?: string; email?: string;
         title?: string; headline?: string; bio?: string; location?: string;
         skills?: Array<{ name: string }>;
         employmentHistory?: Array<{ companyName: string; title: string; startDate?: string; endDate?: string }>;
         education?: Array<{ institution: string; degree: string; fieldOfStudy?: string }>;
         projects?: Array<{ name: string; description?: string }>;
-      };
+      }>("/api/v2/profile", {}, auth);
 
       if (!p || (!p.firstName && !p.email)) return "Could not retrieve profile.";
 
@@ -66,7 +66,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       if (args.bio) body.bio = args.bio;
       if (args.location) body.location = args.location;
 
-      await apiCall("/api/profile/basic", {
+      await apiCall("/api/v2/profile/basic", {
         method: "PUT",
         body: JSON.stringify(body),
       }, auth);
@@ -84,7 +84,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall("/api/profile/skills", {
+      await apiCall("/api/v2/profile/skills", {
         method: "PUT",
         body: JSON.stringify({ skills: args.skills }),
       }, auth);
@@ -108,7 +108,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall("/api/profile/employment", {
+      await apiCall("/api/v2/profile/employment", {
         method: "PUT",
         body: JSON.stringify({ employments: args.employments }),
       }, auth);
@@ -132,7 +132,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall("/api/profile/education", {
+      await apiCall("/api/v2/profile/education", {
         method: "PUT",
         body: JSON.stringify({ educations: args.educations }),
       }, auth);
@@ -155,7 +155,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall("/api/profile/projects", {
+      await apiCall("/api/v2/profile/projects", {
         method: "PUT",
         body: JSON.stringify({ projects: args.projects }),
       }, auth);
@@ -179,7 +179,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall("/api/profile/references", {
+      await apiCall("/api/v2/profile/references", {
         method: "PUT",
         body: JSON.stringify({ references: args.references }),
       }, auth);
@@ -231,7 +231,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
       if (args.projects) body.projects = args.projects;
       if (args.references) body.references = args.references;
 
-      await apiCall("/api/profile/full", {
+      await apiCall("/api/v2/profile/full", {
         method: "PUT",
         body: JSON.stringify(body),
       }, auth);
@@ -247,7 +247,7 @@ export function registerProfileTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/portfolios/${args.identifier}`, {}, auth)) as {
         data?: {
           displayName?: string; headline?: string; bio?: string;
           skills?: Array<{ name: string }>;

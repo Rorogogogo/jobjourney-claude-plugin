@@ -28,18 +28,16 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
         args.help_topics.forEach((topic) => params.append("helpTopics", topic));
       }
 
-      const data = (await apiCall(`/api/CoffeeChat/profiles?${params.toString()}`, {}, auth)) as {
-        data?: {
-          items?: Array<{
-            userId: string; displayName: string; headline?: string;
-            industry?: string; helpTopics?: string[]; yearsExperience?: number;
-            bio?: string;
-          }>;
-          totalCount?: number;
-        };
+      const data = (await apiCall(`/api/v2/coffee-chats/profiles?${params.toString()}`, {}, auth)) as {
+        items?: Array<{
+          userId: string; displayName: string; headline?: string;
+          industry?: string; helpTopics?: string[]; yearsExperience?: number;
+          bio?: string;
+        }>;
+        totalCount?: number;
       };
 
-      const profiles = data.data?.items || [];
+      const profiles = data.items || [];
       if (profiles.length === 0) {
         return "No coffee chat contacts found matching your criteria.";
       }
@@ -51,7 +49,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
         })
         .join("\n\n");
 
-      return `Found ${data.data?.totalCount || profiles.length} contact(s):\n\n${contactList}`;
+      return `Found ${data.totalCount || profiles.length} contact(s):\n\n${contactList}`;
     },
   });
 
@@ -65,7 +63,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/CoffeeChat/requests", {
+      const data = (await apiCall("/api/v2/coffee-chats/requests", {
         method: "POST",
         body: JSON.stringify({ receiverId: args.receiver_id, message: args.message }),
       }, auth)) as { message?: string; errorCode?: string };
@@ -88,7 +86,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     execute: async (args, context) => {
       const auth = context.session;
       const direction = args.direction || "sent";
-      const data = (await apiCall(`/api/CoffeeChat/requests/${direction}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/coffee-chats/requests/${direction}`, {}, auth)) as {
         data?: Array<{
           id: string;
           senderDisplayName?: string;
@@ -123,7 +121,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/coffeechat/my-profile", {}, auth)) as {
+      const data = (await apiCall("/api/v2/coffee-chats/my-profile", {}, auth)) as {
         data?: {
           displayName?: string; headline?: string; bio?: string;
           industry?: string; helpTopics?: string[]; yearsExperience?: number;
@@ -177,7 +175,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
       if (args.years_experience !== undefined) body.yearsExperience = args.years_experience;
       if (args.is_available !== undefined) body.isAvailable = args.is_available;
 
-      const data = (await apiCall("/api/coffeechat/my-profile", {
+      const data = (await apiCall("/api/v2/coffee-chats/my-profile", {
         method: "POST",
         body: JSON.stringify(body),
       }, auth)) as { message?: string; errorCode?: string };
@@ -194,7 +192,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      await apiCall("/api/coffeechat/my-profile", { method: "DELETE" }, auth);
+      await apiCall("/api/v2/coffee-chats/my-profile", { method: "DELETE" }, auth);
       return "Coffee chat profile deleted successfully.";
     },
   });
@@ -208,7 +206,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/coffeechat/requests/${args.request_id}`, {
+      await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}`, {
         method: "PUT",
         body: JSON.stringify({ action: args.action }),
       }, auth);
@@ -225,7 +223,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/coffeechat/requests/${args.request_id}/messages`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}/messages`, {}, auth)) as {
         data?: Array<{
           id: string; content: string; senderDisplayName?: string;
           createdOnUtc: string;
@@ -254,7 +252,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/coffeechat/requests/${args.request_id}/messages`, {
+      await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}/messages`, {
         method: "POST",
         body: JSON.stringify({ content: args.content }),
       }, auth);
@@ -268,7 +266,7 @@ export function registerCoffeeChatTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/coffeechat/stats", {}, auth)) as {
+      const data = (await apiCall("/api/v2/coffee-chats/stats", {}, auth)) as {
         data?: {
           totalSent?: number; totalReceived?: number; accepted?: number;
           declined?: number; pending?: number;

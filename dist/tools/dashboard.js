@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiData } from "../api.js";
 export function registerDashboardTools(server) {
     server.addTool({
         name: "get_dashboard_stats",
@@ -7,8 +7,8 @@ export function registerDashboardTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const stats = (await apiCall("/api/dashboard/statistics", {}, auth));
-            if (stats.errorCode)
+            const stats = await apiData("/api/v2/dashboard/statistics", {}, auth);
+            if (!stats)
                 return "Could not retrieve dashboard statistics.";
             const js = stats.jobStatistics;
             const sm = stats.scrapingMetrics;

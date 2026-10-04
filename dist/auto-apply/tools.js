@@ -119,14 +119,14 @@ export function registerAutoApplyTools(server) {
             let fileUrl;
             let fileName;
             if (args.document_id) {
-                const doc = (await apiCall(`/api/document/${args.document_id}`, {}, auth));
+                const doc = (await apiCall(`/api/v2/documents/${args.document_id}`, {}, auth));
                 if (!doc.data?.fileUrl)
                     throw new Error("Document not found or has no file URL.");
                 fileUrl = doc.data.fileUrl;
                 fileName = doc.data.name || "resume";
             }
             else {
-                const cvData = (await apiCall("/api/document/cvs", {}, auth));
+                const cvData = (await apiCall("/api/v2/documents/cvs", {}, auth));
                 const cvs = cvData.items || [];
                 const primary = cvs.find((c) => c.isPrimary) || cvs[0];
                 if (!primary)
@@ -198,7 +198,7 @@ export function registerAutoApplyTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const result = (await apiCall(`/api/document/${args.document_id}/set-primary`, {
+            const result = (await apiCall(`/api/v2/documents/${args.document_id}/primary`, {
                 method: "PUT",
             }, auth));
             if (result.errorCode) {

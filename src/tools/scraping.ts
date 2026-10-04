@@ -1,6 +1,6 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiCall, apiData } from "../api.js";
 import { SessionAuth } from "../types.js";
 
 export function registerScrapingTools(server: FastMCP<SessionAuth>) {
@@ -10,7 +10,7 @@ export function registerScrapingTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/scraping-statistics", {}, auth)) as {
+      const data = (await apiCall("/api/v2/scraping-statistics", {}, auth)) as {
         items?: Array<{
           id: string; country?: string; jobTitle?: string; location?: string;
           platforms?: string; jobsFound: number; totalScrapedCount: number;
@@ -36,9 +36,11 @@ export function registerScrapingTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/scraping-statistics/aggregated", {}, auth)) as {
-        jobsFound?: number; totalScrapedCount?: number;
-      };
+      const data = await apiData<{ jobsFound?: number; totalScrapedCount?: number }>(
+        "/api/v2/scraping-statistics/aggregated",
+        {},
+        auth
+      );
 
       if (!data) return "Could not retrieve aggregated scraping statistics.";
       return `Aggregated Scraping Stats:\n  Total jobs found: ${data.jobsFound ?? 0}\n  Total scraped: ${data.totalScrapedCount ?? 0}`;

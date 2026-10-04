@@ -35,7 +35,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       formData.append("Status", String(STATUS_MAP[args.status || "saved"] || JOB_STATUS.SAVED));
       formData.append("IsStarred", String(args.is_starred || false));
 
-      const result = await fetch(`${API_BASE_URL}/api/Job/manually-save`, {
+      const result = await fetch(`${API_BASE_URL}/api/v2/jobs/manually-save`, {
         method: "POST",
         headers: getAuthHeaders(auth),
         body: formData,
@@ -64,13 +64,13 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     execute: async (args, context) => {
       const auth = context.session;
       const params = new URLSearchParams();
-      params.append("pageNumber", "1");
+      params.append("page", "1");
       params.append("pageSize", String(args.limit || 10));
       if (args.search) params.append("searchText", args.search);
       if (args.status) params.append("status", String(STATUS_MAP[args.status]));
       if (args.starred_only) params.append("isStarred", "true");
 
-      const data = (await apiCall(`/api/Job?${params.toString()}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/jobs?${params.toString()}`, {}, auth)) as {
         items?: Array<{
           id: string; name: string; companyName: string; status: string;
           isStarred: boolean; createdOnUtc: string; location?: string;
@@ -104,7 +104,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/Job/${args.job_id}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/jobs/${args.job_id}`, {}, auth)) as {
         data?: {
           id: string; name: string; companyName: string; status: string;
           isStarred: boolean; location?: string; description?: string;
@@ -153,7 +153,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
       if (newStatus === undefined) {
         return `Invalid status: ${args.status}. Valid options: saved, applied, initial_interview, final_interview, offered, rejected, expired`;
       }
-      await apiCall(`/api/Job/${args.job_id}/status/${newStatus}`, { method: "PUT" }, auth);
+      await apiCall(`/api/v2/jobs/${args.job_id}/status/${newStatus}`, { method: "PUT" }, auth);
       return `Job status updated to: ${STATUS_TEXT[newStatus]}`;
     },
   });
@@ -166,7 +166,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/Job/${args.job_id}`, { method: "DELETE" }, auth);
+      await apiCall(`/api/v2/jobs/${args.job_id}`, { method: "DELETE" }, auth);
       return "Job deleted successfully.";
     },
   });
@@ -180,7 +180,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/Job/${args.job_id}/star`, {
+      await apiCall(`/api/v2/jobs/${args.job_id}/star`, {
         method: "PUT",
         body: JSON.stringify({ isStarred: args.is_starred }),
       }, auth);
@@ -198,7 +198,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/Job/${args.job_id}/notes`, {
+      const data = (await apiCall(`/api/v2/jobs/${args.job_id}/notes`, {
         method: "POST",
         body: JSON.stringify({ content: args.content }),
       }, auth)) as { data?: { id: string; content: string } };
@@ -217,7 +217,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, {
+      await apiCall(`/api/v2/jobs/${args.job_id}/notes/${args.note_id}`, {
         method: "PUT",
         body: JSON.stringify({ content: args.content }),
       }, auth);
@@ -234,7 +234,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/Job/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, auth);
+      await apiCall(`/api/v2/jobs/${args.job_id}/notes/${args.note_id}`, { method: "DELETE" }, auth);
       return "Note deleted successfully.";
     },
   });
@@ -247,7 +247,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/Job/${args.job_id}/cv-evaluation`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/jobs/${args.job_id}/cv-evaluation`, {}, auth)) as {
         data?: {
           overallScore?: number;
           summary?: string;
@@ -280,7 +280,7 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/Job/${args.job_id}/cover-letter`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/jobs/${args.job_id}/cover-letter`, {}, auth)) as {
         data?: string;
       };
 
@@ -302,9 +302,9 @@ export function registerJobTools(server: FastMCP<SessionAuth>) {
     execute: async (args, context) => {
       const auth = context.session;
       const actionMap: Record<string, string> = {
-        delete: "/api/bulk-job/delete",
-        reject: "/api/bulk-job/reject",
-        proceed: "/api/bulk-job/proceed",
+        delete: "/api/v2/jobs/bulk/delete",
+        reject: "/api/v2/jobs/bulk/reject",
+        proceed: "/api/v2/jobs/bulk/proceed",
       };
       const endpoint = actionMap[args.action];
       if (!endpoint) return "Invalid action. Use: delete, reject, or proceed.";

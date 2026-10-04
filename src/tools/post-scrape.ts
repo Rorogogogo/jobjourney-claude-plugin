@@ -11,10 +11,8 @@ export interface ScrapeResult {
 }
 
 interface ExchangeApiKeyResponse {
-  token: string;
-  user: unknown;
-  roles: string[];
   isSuccess: boolean;
+  data?: { token: string; user: unknown; roles: string[] } | null;
 }
 
 export async function onScrapeComplete(result: ScrapeResult): Promise<void> {
@@ -25,7 +23,7 @@ export async function onScrapeComplete(result: ScrapeResult): Promise<void> {
     if (apiKey) {
       try {
         await apiCall(
-          "/api/scrape-run/complete",
+          "/api/v2/scrape-runs/complete",
           {
             method: "POST",
             body: JSON.stringify({
@@ -53,12 +51,12 @@ export async function onScrapeComplete(result: ScrapeResult): Promise<void> {
     if (apiKey) {
       try {
         const data = (await apiCall(
-          "/api/auth/exchange-api-key",
+          "/api/v2/auth/exchange-api-key",
           { method: "POST" },
           apiKey,
         )) as ExchangeApiKeyResponse;
-        if (data.token) {
-          authToken = data.token;
+        if (data.data?.token) {
+          authToken = data.data.token;
         }
       } catch {
         // graceful fallback — open browser without auto-login

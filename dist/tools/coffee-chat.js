@@ -25,8 +25,8 @@ export function registerCoffeeChatTools(server) {
             if (args.help_topics) {
                 args.help_topics.forEach((topic) => params.append("helpTopics", topic));
             }
-            const data = (await apiCall(`/api/CoffeeChat/profiles?${params.toString()}`, {}, auth));
-            const profiles = data.data?.items || [];
+            const data = (await apiCall(`/api/v2/coffee-chats/profiles?${params.toString()}`, {}, auth));
+            const profiles = data.items || [];
             if (profiles.length === 0) {
                 return "No coffee chat contacts found matching your criteria.";
             }
@@ -36,7 +36,7 @@ export function registerCoffeeChatTools(server) {
                 return `${i + 1}. ${p.displayName}\n   ${p.headline || "Professional"}\n   Industry: ${p.industry || "N/A"} | Experience: ${p.yearsExperience || "?"} years\n   Can help with: ${topics}\n   User ID: ${p.userId}`;
             })
                 .join("\n\n");
-            return `Found ${data.data?.totalCount || profiles.length} contact(s):\n\n${contactList}`;
+            return `Found ${data.totalCount || profiles.length} contact(s):\n\n${contactList}`;
         },
     });
     server.addTool({
@@ -48,7 +48,7 @@ export function registerCoffeeChatTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/CoffeeChat/requests", {
+            const data = (await apiCall("/api/v2/coffee-chats/requests", {
                 method: "POST",
                 body: JSON.stringify({ receiverId: args.receiver_id, message: args.message }),
             }, auth));
@@ -69,7 +69,7 @@ export function registerCoffeeChatTools(server) {
         execute: async (args, context) => {
             const auth = context.session;
             const direction = args.direction || "sent";
-            const data = (await apiCall(`/api/CoffeeChat/requests/${direction}`, {}, auth));
+            const data = (await apiCall(`/api/v2/coffee-chats/requests/${direction}`, {}, auth));
             const requests = data.data || [];
             if (requests.length === 0) {
                 return `No ${direction} coffee chat requests found.`;
@@ -90,7 +90,7 @@ export function registerCoffeeChatTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/coffeechat/my-profile", {}, auth));
+            const data = (await apiCall("/api/v2/coffee-chats/my-profile", {}, auth));
             if (data.errorCode) {
                 return "No coffee chat profile found. Use update_coffee_profile to create one.";
             }
@@ -138,7 +138,7 @@ export function registerCoffeeChatTools(server) {
                 body.yearsExperience = args.years_experience;
             if (args.is_available !== undefined)
                 body.isAvailable = args.is_available;
-            const data = (await apiCall("/api/coffeechat/my-profile", {
+            const data = (await apiCall("/api/v2/coffee-chats/my-profile", {
                 method: "POST",
                 body: JSON.stringify(body),
             }, auth));
@@ -153,7 +153,7 @@ export function registerCoffeeChatTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            await apiCall("/api/coffeechat/my-profile", { method: "DELETE" }, auth);
+            await apiCall("/api/v2/coffee-chats/my-profile", { method: "DELETE" }, auth);
             return "Coffee chat profile deleted successfully.";
         },
     });
@@ -166,7 +166,7 @@ export function registerCoffeeChatTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/coffeechat/requests/${args.request_id}`, {
+            await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}`, {
                 method: "PUT",
                 body: JSON.stringify({ action: args.action }),
             }, auth);
@@ -181,7 +181,7 @@ export function registerCoffeeChatTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall(`/api/coffeechat/requests/${args.request_id}/messages`, {}, auth));
+            const data = (await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}/messages`, {}, auth));
             const messages = data.data || [];
             if (messages.length === 0) {
                 return "No messages in this conversation yet.";
@@ -201,7 +201,7 @@ export function registerCoffeeChatTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/coffeechat/requests/${args.request_id}/messages`, {
+            await apiCall(`/api/v2/coffee-chats/requests/${args.request_id}/messages`, {
                 method: "POST",
                 body: JSON.stringify({ content: args.content }),
             }, auth);
@@ -214,7 +214,7 @@ export function registerCoffeeChatTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/coffeechat/stats", {}, auth));
+            const data = (await apiCall("/api/v2/coffee-chats/stats", {}, auth));
             const s = data.data;
             if (!s)
                 return "Could not retrieve coffee chat statistics.";

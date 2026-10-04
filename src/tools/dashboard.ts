@@ -1,6 +1,6 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiCall, apiData } from "../api.js";
 import { SessionAuth } from "../types.js";
 
 export function registerDashboardTools(server: FastMCP<SessionAuth>) {
@@ -11,7 +11,7 @@ export function registerDashboardTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const stats = (await apiCall("/api/dashboard/statistics", {}, auth)) as {
+      const stats = await apiData<{
         jobStatistics?: {
           total: number; applied: number; initialInterview: number; finalInterview: number;
           offer: number; rejected: number; starred: number; savedOnly: number;
@@ -20,10 +20,9 @@ export function registerDashboardTools(server: FastMCP<SessionAuth>) {
         documentStatistics?: { totalCvs: number; totalCoverLetters: number };
         portfolioMetrics?: { visitCount: number };
         featureUsage?: Record<string, number>;
-        errorCode?: string | null;
-      };
+      }>("/api/v2/dashboard/statistics", {}, auth);
 
-      if (stats.errorCode) return "Could not retrieve dashboard statistics.";
+      if (!stats) return "Could not retrieve dashboard statistics.";
 
       const js = stats.jobStatistics;
       const sm = stats.scrapingMetrics;

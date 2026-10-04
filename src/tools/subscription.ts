@@ -10,7 +10,7 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/subscription/status", {}, auth)) as {
+      const data = (await apiCall("/api/v2/subscriptions/status", {}, auth)) as {
         errorCode?: string | null; message?: string; isSuccess?: boolean;
       };
 
@@ -24,7 +24,7 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/subscription/plans", {}, auth)) as {
+      const data = (await apiCall("/api/v2/subscriptions/plans", {}, auth)) as {
         items?: Array<{
           name: string; price?: number; interval?: string; currency?: string;
           features?: string[]; description?: string;
@@ -53,11 +53,11 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, auth)) as {
-        errorCode?: string | null; message?: string; isSuccess?: boolean;
+      const data = (await apiCall(`/api/v2/subscriptions/features/${args.feature_name}`, {}, auth)) as {
+        message?: string; data?: { hasAccess?: boolean };
       };
 
-      return data.isSuccess
+      return data.data?.hasAccess
         ? `You have access to "${args.feature_name}".`
         : `You do not have access to "${args.feature_name}".${data.message ? ` Reason: ${data.message}` : ""}`;
     },
@@ -69,19 +69,16 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/subscription/payments", {}, auth)) as {
-        errorCode?: string | null; message?: string; isSuccess?: boolean;
-        subscriptionHistory?: Array<{
-          id: string; amount: number; status?: string;
-          transactionDateOnUtc?: string; description?: string;
-        }>;
+      const data = (await apiCall("/api/v2/subscriptions/payments", {}, auth)) as {
+        data?: {
+          subscriptionHistory?: Array<{
+            id: string; amount: number; status?: string;
+            transactionDateOnUtc?: string; description?: string;
+          }>;
+        };
       };
 
-      if (data.errorCode) {
-        return `Unable to retrieve payment history: ${data.message || data.errorCode}`;
-      }
-
-      const payments = data.subscriptionHistory || [];
+      const payments = data.data?.subscriptionHistory || [];
       if (payments.length === 0) return "No payment history found.";
 
       const list = payments.map((p, i) => {

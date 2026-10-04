@@ -7,7 +7,7 @@ export function registerSubscriptionTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/subscription/status", {}, auth));
+            const data = (await apiCall("/api/v2/subscriptions/status", {}, auth));
             return `Subscription Status: ${data.message || "Unknown"}`;
         },
     });
@@ -17,7 +17,7 @@ export function registerSubscriptionTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/subscription/plans", {}, auth));
+            const data = (await apiCall("/api/v2/subscriptions/plans", {}, auth));
             const plans = data.items || [];
             if (plans.length === 0)
                 return "No subscription plans available.";
@@ -38,8 +38,8 @@ export function registerSubscriptionTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall(`/api/subscription/check/${args.feature_name}`, {}, auth));
-            return data.isSuccess
+            const data = (await apiCall(`/api/v2/subscriptions/features/${args.feature_name}`, {}, auth));
+            return data.data?.hasAccess
                 ? `You have access to "${args.feature_name}".`
                 : `You do not have access to "${args.feature_name}".${data.message ? ` Reason: ${data.message}` : ""}`;
         },
@@ -50,11 +50,8 @@ export function registerSubscriptionTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/subscription/payments", {}, auth));
-            if (data.errorCode) {
-                return `Unable to retrieve payment history: ${data.message || data.errorCode}`;
-            }
-            const payments = data.subscriptionHistory || [];
+            const data = (await apiCall("/api/v2/subscriptions/payments", {}, auth));
+            const payments = data.data?.subscriptionHistory || [];
             if (payments.length === 0)
                 return "No payment history found.";
             const list = payments.map((p, i) => {

@@ -15,7 +15,7 @@ export function registerDocumentTools(server) {
             const docType = args.type || "all";
             const results = [];
             if (docType === "all" || docType === "cvs") {
-                const cvData = (await apiCall("/api/document/cvs", {}, auth));
+                const cvData = (await apiCall("/api/v2/documents/cvs", {}, auth));
                 const cvs = cvData.items || [];
                 if (cvs.length > 0) {
                     results.push("CVs:");
@@ -29,7 +29,7 @@ export function registerDocumentTools(server) {
                 }
             }
             if (docType === "all" || docType === "cover-letters") {
-                const clData = (await apiCall("/api/document/cover-letters", {}, auth));
+                const clData = (await apiCall("/api/v2/documents/cover-letters", {}, auth));
                 const cls = clData.items || [];
                 if (cls.length > 0) {
                     results.push("\nCover Letters:");
@@ -52,7 +52,7 @@ export function registerDocumentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall(`/api/document/${args.document_id}`, {}, auth));
+            const data = (await apiCall(`/api/v2/documents/${args.document_id}`, {}, auth));
             const doc = data.data;
             if (!doc)
                 return "Document not found.";
@@ -75,7 +75,7 @@ export function registerDocumentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/document/${args.type}/${args.document_id}`, { method: "DELETE" }, auth);
+            await apiCall(`/api/v2/documents/${args.document_id}`, { method: "DELETE" }, auth);
             return "Document deleted successfully.";
         },
     });
@@ -88,7 +88,7 @@ export function registerDocumentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/document/rename/${args.document_id}`, {
+            await apiCall(`/api/v2/documents/${args.document_id}/name`, {
                 method: "PUT",
                 body: JSON.stringify({ name: args.name }),
             }, auth);

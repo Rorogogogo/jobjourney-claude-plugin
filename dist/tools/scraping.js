@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiCall, apiData } from "../api.js";
 export function registerScrapingTools(server) {
     server.addTool({
         name: "get_scraping_stats",
@@ -7,7 +7,7 @@ export function registerScrapingTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/scraping-statistics", {}, auth));
+            const data = (await apiCall("/api/v2/scraping-statistics", {}, auth));
             const items = data.items || [];
             if (items.length === 0)
                 return "No scraping statistics found.";
@@ -21,7 +21,7 @@ export function registerScrapingTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/scraping-statistics/aggregated", {}, auth));
+            const data = await apiData("/api/v2/scraping-statistics/aggregated", {}, auth);
             if (!data)
                 return "Could not retrieve aggregated scraping statistics.";
             return `Aggregated Scraping Stats:\n  Total jobs found: ${data.jobsFound ?? 0}\n  Total scraped: ${data.totalScrapedCount ?? 0}`;

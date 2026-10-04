@@ -14,7 +14,7 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     execute: async (args, context) => {
       const auth = context.session;
       const limit = args.limit || 10;
-      const data = (await apiCall(`/api/notification?page=1&pageSize=${limit}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/notifications?page=1&pageSize=${limit}`, {}, auth)) as {
         items?: Array<{
           id: string; message: string;
           isRead: boolean; createdOnUtc: string; type?: string;
@@ -46,7 +46,7 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      await apiCall("/api/notification/read-all", { method: "PUT" }, auth);
+      await apiCall("/api/v2/notifications/read-all", { method: "PUT" }, auth);
       return "All notifications marked as read.";
     },
   });
@@ -57,7 +57,7 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/notification/count", {}, auth)) as {
+      const data = (await apiCall("/api/v2/notifications/count", {}, auth)) as {
         data?: number;
       };
       return `Unread notifications: ${data.data ?? 0}`;
@@ -72,7 +72,7 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/notification/${args.notification_id}/read`, { method: "PUT" }, auth);
+      await apiCall(`/api/v2/notifications/${args.notification_id}/read`, { method: "PUT" }, auth);
       return "Notification marked as read.";
     },
   });
@@ -85,7 +85,7 @@ export function registerNotificationTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/notification/${args.notification_id}`, { method: "DELETE" }, auth);
+      await apiCall(`/api/v2/notifications/${args.notification_id}`, { method: "DELETE" }, auth);
       return "Notification deleted.";
     },
   });
