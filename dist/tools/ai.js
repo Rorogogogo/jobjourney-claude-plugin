@@ -21,7 +21,7 @@ export function registerAiTools(server) {
             };
             if (args.job_id)
                 jobObj.id = args.job_id;
-            const data = (await apiCall("/api/ai/evaluate-job-fit?confirmFreeTrial=true", {
+            const data = (await apiCall("/api/ai/evaluate-job-fit", {
                 method: "POST",
                 body: JSON.stringify({ job: jobObj }),
             }, auth));
@@ -64,7 +64,7 @@ export function registerAiTools(server) {
             };
             if (args.job_id)
                 body.jobId = args.job_id;
-            const data = (await apiCall("/api/ai/generate-cover-letter-for-job?confirmFreeTrial=true", {
+            const data = (await apiCall("/api/ai/generate-cover-letter-for-job", {
                 method: "POST",
                 body: JSON.stringify(body),
             }, auth));
@@ -75,91 +75,6 @@ export function registerAiTools(server) {
         },
     });
     server.addTool({
-        name: "generate_interview_questions",
-        description: "Use AI to generate practice interview questions for a specific job. Choose between technical or behavioral questions.",
-        parameters: z.object({
-            job_title: z.string().describe("Job title"),
-            company: z.string().optional().describe("Company name"),
-            description: z.string().optional().describe("Job description"),
-            required_skills: z.string().optional().describe("Required skills"),
-            interview_type: z
-                .enum(["Technical", "Behavioral"])
-                .optional()
-                .describe("Type of interview questions (default: Technical)"),
-        }),
-        execute: async (args, context) => {
-            const auth = context.session;
-            const body = {
-                job: {
-                    name: args.job_title,
-                    companyName: args.company,
-                    description: args.description,
-                    requiredSkills: args.required_skills,
-                },
-                interviewType: args.interview_type || "Technical",
-            };
-            const data = (await apiCall("/api/ai/generate-interview-questions?confirmFreeTrial=true", {
-                method: "POST",
-                body: JSON.stringify(body),
-            }, auth));
-            if (data.errorCode) {
-                return `Question generation failed: ${data.message || data.errorCode}`;
-            }
-            const questions = data.data;
-            if (!questions || questions.length === 0) {
-                return "No interview questions generated.";
-            }
-            return [
-                `${args.interview_type || "Technical"} Interview Questions for ${args.job_title}`,
-                "",
-                ...questions.map((q, i) => `${i + 1}. ${q}`),
-            ].join("\n");
-        },
-    });
-    server.addTool({
-        name: "conduct_mock_interview",
-        description: "Conduct an AI-powered mock interview for a specific job. Simulates a real interview experience.",
-        parameters: z.object({
-            job_id: z.string().describe("The job ID to conduct a mock interview for"),
-            interview_type: z
-                .enum(["Technical", "Behavioral"])
-                .optional()
-                .describe("Type of interview (default: Technical)"),
-        }),
-        execute: async (args, context) => {
-            const auth = context.session;
-            const body = {
-                jobId: args.job_id,
-                interviewType: args.interview_type || "Technical",
-            };
-            const data = (await apiCall("/api/ai/conduct-mock-interview?confirmFreeTrial=true", {
-                method: "POST",
-                body: JSON.stringify(body),
-            }, auth));
-            if (data.errorCode) {
-                return `Mock interview failed: ${data.message || data.errorCode}`;
-            }
-            return typeof data.data === "string" ? data.data : JSON.stringify(data.data, null, 2);
-        },
-    });
-    server.addTool({
-        name: "get_mock_interview_report",
-        description: "Get the mock interview report for a specific job.",
-        parameters: z.object({
-            job_id: z.string().describe("The job ID to get the mock interview report for"),
-        }),
-        execute: async (args, context) => {
-            const auth = context.session;
-            const data = (await apiCall(`/api/ai/get-mock-interview-report/${args.job_id}`, {}, auth));
-            if (data.errorCode) {
-                return `Failed to get report: ${data.message || data.errorCode}`;
-            }
-            if (!data.data)
-                return "No mock interview report found for this job.";
-            return typeof data.data === "string" ? data.data : JSON.stringify(data.data, null, 2);
-        },
-    });
-    server.addTool({
         name: "generate_coffee_chat_suggestions",
         description: "Use AI to generate personalized coffee chat introduction messages based on a person's profile.",
         parameters: z.object({
@@ -167,7 +82,7 @@ export function registerAiTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions?confirmFreeTrial=true", {
+            const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions", {
                 method: "POST",
                 body: JSON.stringify({ receiverId: args.receiver_id }),
             }, auth));

@@ -12,7 +12,7 @@
 
 ## ✨ What It Does
 
-- 🤖 **AI job-search workflows** for resume fit scoring, cover letters, CV generation, interview prep, and career chat
+- 🤖 **AI job-search workflows** for resume fit scoring, cover letters, and CV generation
 - 🗂️ **Application tracking** with saved jobs, notes, status changes, starring, search, and dashboard analytics
 - 🔍 **Local job discovery** with a canonical discovery engine that stores results in local SQLite
 - 🌐 **Mixed scraping strategy**: LinkedIn uses direct HTTP guest scraping, while blocked sites like SEEK use Playwright
@@ -193,7 +193,6 @@ And the broader platform also includes:
 - job tracking
 - AI fit evaluation
 - cover letter and CV generation
-- mock interviews
 - dashboard analytics
 - coffee chat networking
 - profile and document management

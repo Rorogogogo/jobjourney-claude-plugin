@@ -1,7 +1,7 @@
 {
   "name": "jobjourney-claude-plugin",
   "version": "3.2.5",
-  "description": "FastMCP server for JobJourney - save jobs, track applications, AI job fit evaluation, cover letter generation, interview prep, coffee chat networking, and more",
+  "description": "FastMCP server for JobJourney - save jobs, track applications, AI job fit evaluation, cover letter generation, coffee chat networking, and more",
   "main": "dist/index.js",
   "bin": {
     "jobjourney-claude-plugin": "dist/index.js"
