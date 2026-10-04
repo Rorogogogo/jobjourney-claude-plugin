@@ -193,7 +193,6 @@ And the broader platform also includes:
 - job tracking
 - AI fit evaluation
 - cover letter and CV generation
-- mock interviews
 - dashboard analytics
 - coffee chat networking
 - profile and document management

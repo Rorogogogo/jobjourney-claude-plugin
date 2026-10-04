@@ -48,7 +48,7 @@ export function registerSubscriptionTools(server: FastMCP<SessionAuth>) {
     name: "check_feature_access",
     description: "Check if the user has access to a specific AI feature based on their subscription.",
     parameters: z.object({
-      feature_name: z.enum(["CvEvaluation", "CoverLetterGeneration", "JobsAnalysis", "ResumeGeneration", "MockInterview"])
+      feature_name: z.enum(["CvEvaluation", "CoverLetterGeneration", "JobsAnalysis", "ResumeGeneration"])
         .describe("The AI feature to check access for"),
     }),
     execute: async (args, context) => {
