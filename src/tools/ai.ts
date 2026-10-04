@@ -25,7 +25,7 @@ export function registerAiTools(server: FastMCP<SessionAuth>) {
       };
       if (args.job_id) jobObj.id = args.job_id;
 
-      const data = (await apiCall("/api/ai/evaluate-job-fit", {
+      const data = (await apiCall("/api/v2/ai/job-fit-evaluations", {
         method: "POST",
         body: JSON.stringify({ job: jobObj }),
       }, auth)) as {
@@ -82,7 +82,7 @@ export function registerAiTools(server: FastMCP<SessionAuth>) {
       };
       if (args.job_id) body.jobId = args.job_id;
 
-      const data = (await apiCall("/api/ai/generate-cover-letter-for-job", {
+      const data = (await apiCall("/api/v2/ai/cover-letters", {
         method: "POST",
         body: JSON.stringify(body),
       }, auth)) as { data?: string; message?: string; errorCode?: string };
@@ -104,7 +104,7 @@ export function registerAiTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions", {
+      const data = (await apiCall("/api/v2/ai/coffee-chat-suggestions", {
         method: "POST",
         body: JSON.stringify({ receiverId: args.receiver_id }),
       }, auth)) as { data?: string[] | string; message?: string; errorCode?: string };

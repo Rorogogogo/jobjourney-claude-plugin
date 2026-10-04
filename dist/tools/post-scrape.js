@@ -6,7 +6,7 @@ export async function onScrapeComplete(result) {
         // 1. Notify backend
         if (apiKey) {
             try {
-                await apiCall("/api/scrape-run/complete", {
+                await apiCall("/api/v2/scrape-runs/complete", {
                     method: "POST",
                     body: JSON.stringify({
                         runId: String(result.runId),
@@ -30,9 +30,9 @@ export async function onScrapeComplete(result) {
         let authToken = null;
         if (apiKey) {
             try {
-                const data = (await apiCall("/api/auth/exchange-api-key", { method: "POST" }, apiKey));
-                if (data.token) {
-                    authToken = data.token;
+                const data = (await apiCall("/api/v2/auth/exchange-api-key", { method: "POST" }, apiKey));
+                if (data.data?.token) {
+                    authToken = data.data.token;
                 }
             }
             catch {

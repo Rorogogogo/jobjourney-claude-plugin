@@ -50,7 +50,25 @@ export async function apiCall(endpoint, options = {}, auth) {
     }
     if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`API error ${response.status}: ${errorText}`);
+        throw new Error(describeFailure(response.status, errorText));
     }
     return response.json();
+}
+/** A failed call's message: the API's own (`{ errorCode, message }`) when it sent one. */
+function describeFailure(status, body) {
+    try {
+        const envelope = JSON.parse(body);
+        if (envelope.message) {
+            return envelope.errorCode ? `${envelope.message} (${envelope.errorCode})` : envelope.message;
+        }
+    }
+    catch {
+        // Not JSON: fall through to the raw text.
+    }
+    return `API error ${status}: ${body}`;
+}
+/** The payload of an answer: every `/api/v2` response carries it under `data`. */
+export async function apiData(endpoint, options = {}, auth) {
+    const response = (await apiCall(endpoint, options, auth));
+    return response.data ?? undefined;
 }

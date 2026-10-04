@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiCall } from "../api.js";
+import { apiCall, apiData } from "../api.js";
 export function registerProfileTools(server) {
     server.addTool({
         name: "get_profile",
@@ -7,7 +7,7 @@ export function registerProfileTools(server) {
         parameters: z.object({}),
         execute: async (_args, context) => {
             const auth = context.session;
-            const p = (await apiCall("/api/profile", {}, auth));
+            const p = await apiData("/api/v2/profile", {}, auth);
             if (!p || (!p.firstName && !p.email))
                 return "Could not retrieve profile.";
             const skills = p.skills?.map(s => s.name).join(", ") || "None listed";
@@ -50,7 +50,7 @@ export function registerProfileTools(server) {
                 body.bio = args.bio;
             if (args.location)
                 body.location = args.location;
-            await apiCall("/api/profile/basic", {
+            await apiCall("/api/v2/profile/basic", {
                 method: "PUT",
                 body: JSON.stringify(body),
             }, auth);
@@ -65,7 +65,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall("/api/profile/skills", {
+            await apiCall("/api/v2/profile/skills", {
                 method: "PUT",
                 body: JSON.stringify({ skills: args.skills }),
             }, auth);
@@ -86,7 +86,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall("/api/profile/employment", {
+            await apiCall("/api/v2/profile/employment", {
                 method: "PUT",
                 body: JSON.stringify({ employments: args.employments }),
             }, auth);
@@ -107,7 +107,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall("/api/profile/education", {
+            await apiCall("/api/v2/profile/education", {
                 method: "PUT",
                 body: JSON.stringify({ educations: args.educations }),
             }, auth);
@@ -127,7 +127,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall("/api/profile/projects", {
+            await apiCall("/api/v2/profile/projects", {
                 method: "PUT",
                 body: JSON.stringify({ projects: args.projects }),
             }, auth);
@@ -148,7 +148,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall("/api/profile/references", {
+            await apiCall("/api/v2/profile/references", {
                 method: "PUT",
                 body: JSON.stringify({ references: args.references }),
             }, auth);
@@ -208,7 +208,7 @@ export function registerProfileTools(server) {
                 body.projects = args.projects;
             if (args.references)
                 body.references = args.references;
-            await apiCall("/api/profile/full", {
+            await apiCall("/api/v2/profile/full", {
                 method: "PUT",
                 body: JSON.stringify(body),
             }, auth);
@@ -223,7 +223,7 @@ export function registerProfileTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall(`/api/profile/portfolio/${args.identifier}`, {}, auth));
+            const data = (await apiCall(`/api/v2/portfolios/${args.identifier}`, {}, auth));
             const p = data.data;
             if (!p)
                 return "Portfolio not found.";

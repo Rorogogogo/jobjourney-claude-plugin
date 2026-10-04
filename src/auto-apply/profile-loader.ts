@@ -1,4 +1,4 @@
-import { apiCall } from "../api.js";
+import { apiData } from "../api.js";
 
 export interface UserProfile {
   firstName?: string;
@@ -38,7 +38,7 @@ export interface UserProfile {
   }>;
 }
 
-/** Raw shape from the backend /api/profile endpoint */
+/** Raw shape from the backend /api/v2/profile endpoint */
 interface ApiProfileResponse {
   firstName?: string;
   lastName?: string;
@@ -77,7 +77,8 @@ interface ApiProfileResponse {
 }
 
 export async function loadUserProfile(apiKey: string): Promise<UserProfile> {
-  const raw = (await apiCall("/api/profile", {}, apiKey)) as ApiProfileResponse;
+  const raw = await apiData<ApiProfileResponse>("/api/v2/profile", {}, apiKey);
+  if (!raw) throw new Error("The profile could not be loaded.");
   return mapApiProfileToUserProfile(raw);
 }
 

@@ -19,7 +19,7 @@ export function registerCvTools(server: FastMCP<SessionAuth>) {
       if (args.job_title) body.jobTitle = args.job_title;
       if (args.job_description) body.jobDescription = args.job_description;
 
-      const data = (await apiCall("/api/cv/generate", {
+      const data = (await apiCall("/api/v2/cv/generate", {
         method: "POST",
         body: JSON.stringify(body),
       }, auth)) as { data?: unknown; message?: string; errorCode?: string };
@@ -51,7 +51,7 @@ export function registerCvTools(server: FastMCP<SessionAuth>) {
       if (args.job_description) body.jobDescription = args.job_description;
       if (args.name) body.name = args.name;
 
-      const data = (await apiCall("/api/cv/generate-and-store", {
+      const data = (await apiCall("/api/v2/cv/generate-and-store", {
         method: "POST",
         body: JSON.stringify(body),
       }, auth)) as { data?: { id?: string; name?: string }; message?: string; errorCode?: string };

@@ -12,15 +12,15 @@ export function registerCommentTools(server) {
             const auth = context.session;
             const page = args.page || 1;
             const limit = args.limit || 10;
-            const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`, {}, auth));
-            const comments = data.data?.items || [];
+            const data = (await apiCall(`/api/v2/comments?page=${page}&pageSize=${limit}`, {}, auth));
+            const comments = data.items || [];
             if (comments.length === 0)
                 return "No community comments found.";
             const list = comments.map((c, i) => {
                 const replies = c.replyCount ? ` (${c.replyCount} replies)` : "";
                 return `${i + 1}. ${c.authorDisplayName || "Anonymous"}${replies}\n   ${c.content.substring(0, 150)}${c.content.length > 150 ? "..." : ""}\n   ${new Date(c.createdOnUtc).toLocaleString()}\n   ID: ${c.id}`;
             }).join("\n\n");
-            return `Community Comments (${data.data?.totalCount || comments.length} total):\n\n${list}`;
+            return `Community Comments (${data.totalCount || comments.length} total):\n\n${list}`;
         },
     });
     server.addTool({
@@ -31,7 +31,7 @@ export function registerCommentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall(`/api/comment/${args.comment_id}/thread`, {}, auth));
+            const data = (await apiCall(`/api/v2/comments/${args.comment_id}/thread`, {}, auth));
             const thread = data.data;
             if (!thread)
                 return "Comment thread not found.";
@@ -55,7 +55,7 @@ export function registerCommentTools(server) {
             const body = { content: args.content };
             if (args.parent_id)
                 body.parentId = args.parent_id;
-            const data = (await apiCall("/api/comment", {
+            const data = (await apiCall("/api/v2/comments", {
                 method: "POST",
                 body: JSON.stringify(body),
             }, auth));
@@ -74,7 +74,7 @@ export function registerCommentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/comment/${args.comment_id}`, {
+            await apiCall(`/api/v2/comments/${args.comment_id}`, {
                 method: "PUT",
                 body: JSON.stringify({ content: args.content }),
             }, auth);
@@ -89,7 +89,7 @@ export function registerCommentTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" }, auth);
+            await apiCall(`/api/v2/comments/${args.comment_id}`, { method: "DELETE" }, auth);
             return "Comment deleted successfully.";
         },
     });

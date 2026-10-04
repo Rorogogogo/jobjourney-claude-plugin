@@ -21,7 +21,7 @@ export function registerAiTools(server) {
             };
             if (args.job_id)
                 jobObj.id = args.job_id;
-            const data = (await apiCall("/api/ai/evaluate-job-fit", {
+            const data = (await apiCall("/api/v2/ai/job-fit-evaluations", {
                 method: "POST",
                 body: JSON.stringify({ job: jobObj }),
             }, auth));
@@ -64,7 +64,7 @@ export function registerAiTools(server) {
             };
             if (args.job_id)
                 body.jobId = args.job_id;
-            const data = (await apiCall("/api/ai/generate-cover-letter-for-job", {
+            const data = (await apiCall("/api/v2/ai/cover-letters", {
                 method: "POST",
                 body: JSON.stringify(body),
             }, auth));
@@ -82,7 +82,7 @@ export function registerAiTools(server) {
         }),
         execute: async (args, context) => {
             const auth = context.session;
-            const data = (await apiCall("/api/ai/generate-coffee-chat-suggestions", {
+            const data = (await apiCall("/api/v2/ai/coffee-chat-suggestions", {
                 method: "POST",
                 body: JSON.stringify({ receiverId: args.receiver_id }),
             }, auth));

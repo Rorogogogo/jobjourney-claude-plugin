@@ -1,6 +1,8 @@
-import { apiCall } from "../api.js";
+import { apiData } from "../api.js";
 export async function loadUserProfile(apiKey) {
-    const raw = (await apiCall("/api/profile", {}, apiKey));
+    const raw = await apiData("/api/v2/profile", {}, apiKey);
+    if (!raw)
+        throw new Error("The profile could not be loaded.");
     return mapApiProfileToUserProfile(raw);
 }
 function mapApiProfileToUserProfile(raw) {

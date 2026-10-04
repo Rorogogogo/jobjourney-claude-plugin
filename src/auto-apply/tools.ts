@@ -141,14 +141,14 @@ export function registerAutoApplyTools(server: FastMCP<SessionAuth>): void {
       let fileName: string;
 
       if (args.document_id) {
-        const doc = (await apiCall(`/api/document/${args.document_id}`, {}, auth)) as {
+        const doc = (await apiCall(`/api/v2/documents/${args.document_id}`, {}, auth)) as {
           data?: { fileUrl?: string; name?: string; fileType?: string };
         };
         if (!doc.data?.fileUrl) throw new Error("Document not found or has no file URL.");
         fileUrl = doc.data.fileUrl;
         fileName = doc.data.name || "resume";
       } else {
-        const cvData = (await apiCall("/api/document/cvs", {}, auth)) as {
+        const cvData = (await apiCall("/api/v2/documents/cvs", {}, auth)) as {
           items?: Array<{ id: string; name: string; fileUrl?: string; isPrimary?: boolean; fileType?: string }>;
         };
         const cvs = cvData.items || [];
@@ -228,7 +228,7 @@ export function registerAutoApplyTools(server: FastMCP<SessionAuth>): void {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const result = (await apiCall(`/api/document/${args.document_id}/set-primary`, {
+      const result = (await apiCall(`/api/v2/documents/${args.document_id}/primary`, {
         method: "PUT",
       }, auth)) as { data?: { name?: string }; errorCode?: string; message?: string };
 

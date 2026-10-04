@@ -10,7 +10,7 @@ export function registerAnalyticsTools(server: FastMCP<SessionAuth>) {
     parameters: z.object({}),
     execute: async (_args, context) => {
       const auth = context.session;
-      const data = (await apiCall("/api/profile/portfolio/visits", {}, auth)) as {
+      const data = (await apiCall("/api/v2/profile/portfolio/visits", {}, auth)) as {
         data?: { totalVisits?: number; visitsThisMonth?: number; visitsThisWeek?: number };
       };
 
@@ -34,7 +34,7 @@ export function registerAnalyticsTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/report-tracking/analytics/${args.report_slug}`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/report-tracking/analytics/${args.report_slug}`, {}, auth)) as {
         data?: unknown;
       };
 

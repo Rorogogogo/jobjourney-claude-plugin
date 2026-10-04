@@ -15,17 +15,15 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       const auth = context.session;
       const page = args.page || 1;
       const limit = args.limit || 10;
-      const data = (await apiCall(`/api/comment/community?page=${page}&pageSize=${limit}`, {}, auth)) as {
-        data?: {
-          items?: Array<{
-            id: string; content: string; authorDisplayName?: string;
-            createdOnUtc: string; replyCount?: number;
-          }>;
-          totalCount?: number;
-        };
+      const data = (await apiCall(`/api/v2/comments?page=${page}&pageSize=${limit}`, {}, auth)) as {
+        items?: Array<{
+          id: string; content: string; authorDisplayName?: string;
+          createdOnUtc: string; replyCount?: number;
+        }>;
+        totalCount?: number;
       };
 
-      const comments = data.data?.items || [];
+      const comments = data.items || [];
       if (comments.length === 0) return "No community comments found.";
 
       const list = comments.map((c, i) => {
@@ -33,7 +31,7 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
         return `${i + 1}. ${c.authorDisplayName || "Anonymous"}${replies}\n   ${c.content.substring(0, 150)}${c.content.length > 150 ? "..." : ""}\n   ${new Date(c.createdOnUtc).toLocaleString()}\n   ID: ${c.id}`;
       }).join("\n\n");
 
-      return `Community Comments (${data.data?.totalCount || comments.length} total):\n\n${list}`;
+      return `Community Comments (${data.totalCount || comments.length} total):\n\n${list}`;
     },
   });
 
@@ -45,7 +43,7 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      const data = (await apiCall(`/api/comment/${args.comment_id}/thread`, {}, auth)) as {
+      const data = (await apiCall(`/api/v2/comments/${args.comment_id}/thread`, {}, auth)) as {
         data?: {
           id: string; content: string; authorDisplayName?: string;
           createdOnUtc: string;
@@ -83,7 +81,7 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
       const body: Record<string, string> = { content: args.content };
       if (args.parent_id) body.parentId = args.parent_id;
 
-      const data = (await apiCall("/api/comment", {
+      const data = (await apiCall("/api/v2/comments", {
         method: "POST",
         body: JSON.stringify(body),
       }, auth)) as { data?: { id: string }; message?: string; errorCode?: string };
@@ -105,7 +103,7 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/comment/${args.comment_id}`, {
+      await apiCall(`/api/v2/comments/${args.comment_id}`, {
         method: "PUT",
         body: JSON.stringify({ content: args.content }),
       }, auth);
@@ -121,7 +119,7 @@ export function registerCommentTools(server: FastMCP<SessionAuth>) {
     }),
     execute: async (args, context) => {
       const auth = context.session;
-      await apiCall(`/api/comment/${args.comment_id}`, { method: "DELETE" }, auth);
+      await apiCall(`/api/v2/comments/${args.comment_id}`, { method: "DELETE" }, auth);
       return "Comment deleted successfully.";
     },
   });
