@@ -1,6 +1,6 @@
 {
   "name": "jobjourney-claude-plugin",
-  "version": "3.2.0",
+  "version": "3.2.5",
   "description": "FastMCP server for JobJourney - save jobs, track applications, AI job fit evaluation, cover letter generation, coffee chat networking, and more",
   "main": "dist/index.js",
   "bin": {
@@ -28,7 +28,7 @@
     "ai-assistant"
   ],
   "author": "JobJourney",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/Rorogogogo/jobjourney-claude-plugin"

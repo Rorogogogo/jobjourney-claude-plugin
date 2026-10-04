@@ -3,7 +3,7 @@
 > A production-ready MCP server for JobJourney with AI job-search tools, local job discovery, and scheduled scraping from Claude.
 
 [![npm version](https://img.shields.io/npm/v/jobjourney-claude-plugin)](https://www.npmjs.com/package/jobjourney-claude-plugin)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE) [![Commercial License](https://img.shields.io/badge/license-Commercial-orange.svg)](COMMERCIAL.md)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)
 ![Protocol](https://img.shields.io/badge/protocol-MCP-7c3aed)
 [![GitHub stars](https://img.shields.io/github/stars/Rorogogogo/jobjourney-claude-plugin?style=social)](https://github.com/Rorogogogo/jobjourney-claude-plugin)
@@ -12,7 +12,7 @@
 
 ## ✨ What It Does
 
-- 🤖 **AI job-search workflows** for resume fit scoring, cover letters, CV generation, interview prep, and career chat
+- 🤖 **AI job-search workflows** for resume fit scoring, cover letters, and CV generation
 - 🗂️ **Application tracking** with saved jobs, notes, status changes, starring, search, and dashboard analytics
 - 🔍 **Local job discovery** with a canonical discovery engine that stores results in local SQLite
 - 🌐 **Mixed scraping strategy**: LinkedIn uses direct HTTP guest scraping, while blocked sites like SEEK use Playwright
@@ -288,4 +288,23 @@ git commit -m "feat: my change"
 
 ## 📄 License
 
-[MIT](LICENSE) © JobJourney
+[AGPL-3.0](LICENSE) + [Commercial](COMMERCIAL.md) © JobJourney
+
+## License
+
+This project is **dual-licensed**:
+
+- 🆓 **AGPL-3.0** — free for personal use, open-source forks, and projects themselves open-sourced under a compatible license. See [LICENSE](LICENSE).
+- 💼 **Commercial license** — required for closed-source products, proprietary internal tools, or paid / hosted services where AGPL-3.0's copyleft and network-use obligations don't fit. See [COMMERCIAL.md](COMMERCIAL.md).
+
+### Do I need a commercial license?
+
+| Use case | License |
+|---|---|
+| Personal use / running locally | AGPL-3.0 (free) |
+| Forking and publishing under AGPL-3.0 | AGPL-3.0 (free) |
+| Bundling into a closed-source product | **Commercial** |
+| Hosting a modified version as a SaaS without publishing source | **Commercial** |
+| Internal company tool not open-sourced | **Commercial** |
+
+For a commercial license, contact **Robert Wang** at **xwang.robert@gmail.com** — see [COMMERCIAL.md](COMMERCIAL.md) for what to include in your request.
